@@ -1,1 +1,1 @@
-# houdini_vex
+# Houdini Vex and Python snippets
