@@ -35,7 +35,7 @@ for(int i=0;i<chi("octaves");i++){
 @Cd=(c/maxval)*chf("mult");
 
 //////////////////////////////////////////////////////////////////// 
-// filter by maxaxis (using packed primitives)
+// filter by size (max axis) when using packed primitives
 vector b = primintrinsic(0,"bounds",@primnum);
 float sx = b[1]-b[0];
 float sy = b[3]-b[2];
@@ -537,25 +537,14 @@ int rays = chi('rays'); // 50
 float bias = chf('bias'); // 0.5
 
 for (int i = 0; i<rays; i++ ) {
-
     raydir = sample_direction_cone(v@N,conewidth,vector2(rand(i*234524)));
     hitprim = intersect(0,@P+(v@N*0.001), raydir*maxdist, hit, u, v);
     hitprim_2 = intersect(1,@P+(v@N*0.001), raydir*maxdist, hit, u, v);
-
     if (hitprim!=-1 || hitprim_2!=-1) tempOcc+=1;
-
 }
 
 float occ = clamp(vop_bias(1.0-(tempOcc / rays), bias), 0, 1);
 @Cd=occ;
 
 
-// ##### PYTHON #####
-//////////////////////////////////////////////////////////////////// 
-# get current camera (python)
-def getCurrentCamera():
-    for i in hou.ui.currentPaneTabs():
-        if i.type().name()=="SceneViewer":
-            return i.curViewport().camera().path()
-            break
 
