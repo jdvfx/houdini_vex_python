@@ -60,6 +60,13 @@ vector r = relbbox(1,@P);
 if(r.x>1||r.y>1||r.z>1||r.x<0||r.y<0||r.z<0){
     removepoint(0,@ptnum);
 }
+/* -------------------------------------------------------------- */
+// fade volume edges (bounds)
+vector r = relbbox(0,@P);
+float o = chf("padding");
+float s = chf("fade_start");
+float d = fit(r.x,s,o,0,1)*fit(r.x,1-s,1-o,0,1)*fit(r.y,s,o,0,1)*fit(r.y,1-s,1-o,0,1)*fit(r.z,s,o,0,1)*fit(r.z,1-s,1-o,0,1);
+f@density *= d;
 
 
 
@@ -543,13 +550,8 @@ vector dz = volumegradient(1,"vel.z",@P);
 vector w = set(dz.y-dy.z,dx.z-dz.x,dy.x-dx.y);
 @Cd = fit(length(w),0,chf("max_vorticity"),0,1)+{0,0,1};
 
-/* -------------------------------------------------------------- */
-// fade volume edges (bounds)
-vector bmin,bmax;
-getbbox(0,bmin,bmax);
-float o = chf("padding");
-float d = fit(@P.x,bmin.x,bmin.x+o,0,1)*fit(@P.x,bmax.x,bmax.x-o,0,1)*fit(@P.y,bmin.y,bmin.y+o,0,1)*fit(@P.y,bmax.y,bmax.y-o,0,1)*fit(@P.z,bmin.z,bmin.z+o,0,1)*fit(@P.z,bmax.z,bmax.z-o,0,1);
-f@density *= d;
+
+
 
 /* -------------------------------------------------------------- */
 // SOP ambient occlusion
