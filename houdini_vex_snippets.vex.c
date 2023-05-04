@@ -13,6 +13,55 @@ if(pt_found == chi("reverse_selection")){
 float angle = radians(chf("angle_in_degrees"));
 vector axis = chv("axis");
 v@v = qrotate(quaternion(angle, axis),v@v);
+/* -------------------------------------------------------------- */
+// create coordinate system X,Y,Z
+// run over Detail
+void line(vector pos1,pos2){
+    int p1 = addpoint(0,pos1);
+    int p2 = addpoint(0,pos2);
+    int prim = addprim(0,"polyline");
+    int v1 = addvertex(0,prim,p1);
+    int v2 = addvertex(0,prim,p2);
+    setattrib(0,"prim","Cd",prim,0,pos2,"set");
+
+}
+vector p0 = vector(0);
+vector p1 = {1,0,0};
+vector p2 = {0,1,0};
+vector p3 = {0,0,1};
+line(p0,p1);
+line(p0,p2);
+line(p0,p3);
+/* -------------------------------------------------------------- */
+// orient to N and up 
+v@up = qrotate(p@orient, {0,1,0});
+v@N = qrotate(p@orient, {0,0,1});
+/* -------------------------------------------------------------- */
+// rainbow XYZ
+v@Cd = relbbox(0,@P);
+/* -------------------------------------------------------------- */
+// ramp by proximity to point (pointcloud)
+int handle = pcopen(1,"P",@P,chf("radius"),chi("maxpoints"));
+float d = 0;
+if(pcnumfound(handle)>0){
+    vector p = pcfilter(handle,"P");
+    d = fit(distance(@P,p),0,chf("radius"),1,0);
+}
+@Cd=d+{0,0,1};
+/* -------------------------------------------------------------- */
+// ramp by proximity to surface
+int prim;
+vector uv;
+float f = xyzdist(1,@P,prim,uv,chf("dist_max"));
+@Cd = fit(f,chf("dist_min"),chf("dist_max"),1,0)+{0,0,1};
+/* -------------------------------------------------------------- */
+// cull points outside/inside bounds 
+vector r = relbbox(1,@P);
+if(r.x>1||r.y>1||r.z>1||r.x<0||r.y<0||r.z<0){
+    removepoint(0,@ptnum);
+}
+
+
 
 
 
@@ -71,16 +120,7 @@ avgN /= len(n)+1;
 v@N = avgN;
 
 
-/* -------------------------------------------------------------- */
-// orient to N and up 
-v@up = qrotate(p@orient, {0,1,0});
-v@N = qrotate(p@orient, {0,0,1});
 
-/* -------------------------------------------------------------- */
-// rainbow XYZ
-vector bmin,bmax;
-getbbox(0,bmin,bmax);
-@Cd=fit(@P,bmin,bmax,0,1);
 
 /* -------------------------------------------------------------- */
 // onoise 3D 
@@ -103,25 +143,7 @@ matrix3 m = qconvert(p@orient);
 @P+=pivot;
 @P+=p-pivot;
 
-/* -------------------------------------------------------------- */
-// cull points outside/inside bounds 
-vector bmin,bmax;
-getbbox(1,bmin,bmax);
-int kill=0;
-if(@P.x<bmin.x || @P.x>bmax.x || @P.y<bmin.y || @P.y>bmax.y || @P.z<bmin.z || @P.z>bmax.z){
-}else{
-    removepoint(0,@ptnum);
-}
 
-/* -------------------------------------------------------------- */
-// ramp from point proximity
-int handle = pcopen(1,"P",@P,chf("radius"),chi("maxpoints"));
-float d = 0;
-if(pcnumfound(handle)>0){
-    vector p = pcfilter(handle,"P");
-    d = fit(distance(@P,p),0,chf("radius"),1,0);
-}
-@Cd=d+{0,0,1};
 
 /* -------------------------------------------------------------- */
 // random color from name attribute
