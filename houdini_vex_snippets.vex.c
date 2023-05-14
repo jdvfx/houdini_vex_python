@@ -74,6 +74,17 @@ f@density *= d;
 
 // --- TO DO ... test VEX below
 
+
+// Sigmoid  function
+// x  : input value
+// k  : steepness of the sigmoid curve
+// x0 : midpoint of the curve
+
+float sigmoid(float x, float k, float x0){
+    return 1.0 / (1.0 + exp(-k * (x - x0)));
+}
+
+
 /* -------------------------------------------------------------- */
 // pop rotate orient using v
 vector up = {0,1,0};
