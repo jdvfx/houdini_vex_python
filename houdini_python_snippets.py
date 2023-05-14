@@ -5,3 +5,13 @@ def getCurrentCamera():
             return i.curViewport().camera().path()
             break
 # -----------------------------------------------------
+
+# walk down chain of nodes and get the last node
+# useful to trigger a ROP job, from SOP
+def branch_down(node):
+    out = node.outputs()
+    if len(out)==0:
+        return node
+    else:      
+        return branch_down(out[0])
+#
