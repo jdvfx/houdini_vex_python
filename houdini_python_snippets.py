@@ -18,7 +18,6 @@ def branch_down(node):
 # --------
 # sim time
 # --------
-
 import os
 from datetime import datetime, timedelta
 
@@ -28,41 +27,54 @@ cache_node_type = "file";
 cache_file_parm = "file";
 file_extension = "bgeo.sc"
 
+def window(array, window_size):
+    out = []
+    for i in range(0,int(len(array)/window_size)):
+        x = array[i*2]
+        y = array[i*2+1]
+        out.append([x,y])
+    return out
+
+def get_time(dir,file):
+    return os.path.getmtime(os.path.join(dir, file))
+
 if selected_nodes:
     node = selected_nodes[0]
 
     if node.type().name() == cache_node_type: 
         file = node.evalParm(cache_file_parm)
 
-        directory = os.path.dirname(file)
+        dir = os.path.dirname(file)
 
-        files = [file for file in os.listdir(directory) if file.endswith(file_extension)]
+        files = [file for file in os.listdir(dir) if file.endswith(file_extension)]
         files.sort(
-            key=lambda x: os.path.getmtime(os.path.join(directory, x)), reverse=True
+            key=lambda x: os.path.getmtime(os.path.join(dir, x)), reverse=False
         )
-
+        
+        for fwin in window(files,2):
+            t0 = get_time(dir,fwin[0])
+            t1 = get_time(dir,fwin[1])
+        
+            # time difference in seconds
+            time_diff_seconds = abs(t0 - t1)
+            
+            # convert to timedelta object
+            time_diff = timedelta(seconds=time_diff_seconds)
+            
+            frame = fwin[0].split(".")[1]
+            print(f"frame: {frame} > time: {str(time_diff)}")
+        
         # creation times for first/last files
-        t0 = os.path.getmtime(os.path.join(directory, files[0]))
-        t1 = os.path.getmtime(os.path.join(directory, files[-1]))
-
-        # time delta to HH:MM:SS
-        diff_seconds = int(t1 - t0)
-        timedelta_obj = timedelta(seconds=diff_seconds)
-        hours, remainder = divmod(timedelta_obj.seconds, 3600)
-        minutes, seconds = divmod(remainder, 60)
-        result = f"{hours:02}:{minutes:02}:{seconds:02}"
-
-        # creation times for first/last files
-        t0 = os.path.getmtime(os.path.join(directory, files[0]))
-        t1 = os.path.getmtime(os.path.join(directory, files[-1]))
-
+        t0 = get_time(dir,files[0])
+        t1 = get_time(dir,files[-1])
+        
         # time difference in seconds
         time_diff_seconds = abs(t0 - t1)
         
         # convert to timedelta object
         time_diff = timedelta(seconds=time_diff_seconds)
         
-        print(f"sim time: {str(time_diff)}")
+        print(f"\n> total cache time: {str(time_diff)}")
 # -----------------------------------------------------
 #
 # ------------------------------------------------
@@ -82,11 +94,11 @@ if selected_nodes:
     if node.type().name() == cache_node_type: 
         file = node.evalParm(cache_file_parm)
 
-        directory = os.path.dirname(file)
+        dir = os.path.dirname(file)
 
-        files = [file for file in os.listdir(directory) if file.endswith(file_extension)]
+        files = [file for file in os.listdir(dir) if file.endswith(file_extension)]
         files.sort(
-            key=lambda x: os.path.getmtime(os.path.join(directory, x)), reverse=True
+            key=lambda x: os.path.getmtime(os.path.join(dir, x)), reverse=True
         )
         newest_file = os.path.basename(files[0])
         last_frame = float(newest_file.split(".")[1])
