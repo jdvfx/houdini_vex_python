@@ -25,14 +25,14 @@ from datetime import datetime, timedelta
 selected_nodes = hou.selectedNodes()
 
 cache_node_type = "file";
-cache_file_path = "path";
+cache_file_parm = "file";
 file_extension = "bgeo.sc"
 
 if selected_nodes:
     node = selected_nodes[0]
 
     if node.type().name() == cache_node_type: 
-        file = node.evalParm(cache_file_path)
+        file = node.evalParm(cache_file_parm)
 
         directory = os.path.dirname(file)
 
@@ -73,14 +73,14 @@ import os
 selected_nodes = hou.selectedNodes()
 
 cache_node_type = "file";
-cache_file_path = "path";
+cache_file_parm = "file";
 file_extension = "bgeo.sc"
 
 if selected_nodes:
     node = selected_nodes[0]
 
     if node.type().name() == cache_node_type: 
-        file = node.evalParm(cache_file_path)
+        file = node.evalParm(cache_file_parm)
 
         directory = os.path.dirname(file)
 
