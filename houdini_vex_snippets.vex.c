@@ -455,7 +455,7 @@ vector scale    = cracktransform(trs, xyz, 2 , p, xform);
 /* -------------------------------------------------------------- */
 //MAKE TRANSFORM
 matrix newTrans = maketransform(trs, xyz, translate, rotate,{1,1,1});
-@orient = quaternion(matrix3(newTrans));
+p@orient = quaternion(matrix3(newTrans));
 
 //rotation in degrees
 matrix matx = qconvert(@orient);
@@ -468,22 +468,39 @@ v@scale = scale;
 
 /* -------------------------------------------------------------- */
 // basic point clustering
+// using point id (optional) and Cd (optional)
+
+int use_Cd = chi("use_Cd");
+int use_id = chi("use_id");
+vector Cd = vector(0);
+vector p = v@P;
+int id = 0; 
+
 int handle = pcopen(0,"P",@P,chf("radius"),chi("maxpoints"));
 if(pcnumfound(handle)>0){
     while(pciterate(handle)){
-        vector c;
-        vector p;
-        pcimport(handle,"P",p);         
-        pcimport(handle,"Cd",c);        
-        float dist = distance(@P,p);
-        int steps  = int(dist / chf("stepsize"));
-        for(int i=0;i< steps;i++){
-          float d = float(i)/float(steps);
-            vector r = (rand(@P*23424+i*55)*vector(2)-1);
-            vector p_ = lerp(@P,p,d)+r*chf("jitter");
-            vector c_ = lerp(@Cd,c,d);            
-            int n = addpoint(0,p_);
-            setpointattrib(0,"Cd",n,c_);
+        
+        pcimport(handle,"P",p);
+        pcimport(handle,"id",id);
+        if(use_Cd) pcimport(handle,"Cd",Cd);
+        
+        if(id>i@id || use_id==0){
+
+            float dist = distance(@P,p);
+            int steps  = int(dist / chf("stepsize"));
+            for(int i=0;i< steps;i++){
+            
+                float d = float(i)/float(steps);
+                vector r = (rand(@P*3927+i*537)*vector(2)-1);
+                vector p_ = lerp(@P,p,d)+r*chf("jitter");
+                
+                int newpoint = addpoint(0,p_);
+                
+                if(use_Cd){
+                    vector Cd_ = lerp(@Cd,Cd,d);            
+                    setpointattrib(0,"Cd",newpoint,Cd_);
+                }
+            }
         }
     }
 }
