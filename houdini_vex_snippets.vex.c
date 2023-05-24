@@ -67,8 +67,11 @@ float o = chf("padding");
 float s = chf("fade_start");
 float d = fit(r.x,s,o,0,1)*fit(r.x,1-s,1-o,0,1)*fit(r.y,s,o,0,1)*fit(r.y,1-s,1-o,0,1)*fit(r.z,s,o,0,1)*fit(r.z,1-s,1-o,0,1);
 f@density *= d;
-
-
+/* -------------------------------------------------------------- */
+// point decimate
+int ptvar = i@ptnum;
+if (chi("use_id")) ptvar = i@id;
+if(rand(ptvar+chf("seed"))>chf("threshold"))removepoint(0,@ptnum);
 
 
 
