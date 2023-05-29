@@ -72,22 +72,20 @@ f@density *= d;
 int ptvar = i@ptnum;
 if (chi("use_id")) ptvar = i@id;
 if(rand(ptvar+chf("seed"))>chf("threshold"))removepoint(0,@ptnum);
-
-
-
-// --- TO DO ... test VEX below
-
-
+/* -------------------------------------------------------------- */
 // Sigmoid  function
 // x  : input value
 // k  : steepness of the sigmoid curve
 // x0 : midpoint of the curve
-
-float sigmoid(float x, float k, float x0){
+// good values for 0-1 range, k=10, x0=0.5
+// WARNING: values at <=0 and >=1 are not exactly 0 or 1
+float sigmoid(float x, k, x0){
     return 1.0 / (1.0 + exp(-k * (x - x0)));
+    // TODO: lerp each to 0 and 1
 }
 
 
+// --- TO DO ... test VEX below
 /* -------------------------------------------------------------- */
 // pop rotate orient using v
 vector up = {0,1,0};
