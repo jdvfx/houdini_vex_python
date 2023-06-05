@@ -143,11 +143,11 @@ v@N = avgN;
 
 /* -------------------------------------------------------------- */
 // onoise 3D 
-vector n3 =onoise (@P*chf("n3_freq")+chv("n3_offset"),chi("n3_turb"),ch("n3_rough"),ch("n3_atten"))*vector(chf("n3_amp"));
+vector n3 =onoise (v@P*chf("n3_freq")+chv("n3_offset"),chi("n3_turb"),ch("n3_rough"),ch("n3_atten"))*vector(chf("n3_amp"));
 
 /* -------------------------------------------------------------- */
 // onpoise 1D
-float n1 =onoise (@P*chf("n1_freq")+chv("n1_offset"),chi("n1_turb"),ch("n1_rough"),ch("n1_atten"))*chf("n1_amp");
+float n1 =onoise (v@P*chf("n1_freq")+chv("n1_offset"),chi("n1_turb"),ch("n1_rough"),ch("n1_atten"))*chf("n1_amp");
 
 /* -------------------------------------------------------------- */
 // transform geo with extractTransform as input 2
@@ -157,10 +157,10 @@ p@orient = point(1,"orient",0);
 
 matrix3 m = qconvert(p@orient);
 
-@P-=pivot;
-@P*=m;
-@P+=pivot;
-@P+=p-pivot;
+v@P-=pivot;
+v@P*=m;
+v@P+=pivot;
+v@P+=p-pivot;
 
 
 
@@ -181,23 +181,23 @@ for(int i=0;i<n_;i++){
     }
 }
 i@nameindex=x;
-@Cd=rand(x);
+v@Cd=rand(x);
 
 /* -------------------------------------------------------------- */
 // minimun colour of neighbour points 
-int n[] = neighbours(0, @ptnum);
-vector Cd = @Cd;
+int n[] = neighbours(0, i@ptnum);
+vector Cd = v@Cd;
 foreach (int pt; n){
     Cd = min(Cd,point(0, "Cd", pt));
 }
-@Cd = Cd;
+v@Cd = Cd;
 
 /* -------------------------------------------------------------- */
 // vex "carve" SOP (run over primitives)
 // keep all the points and slide them along curve
 float u = ch("u");
 vector uv = set(0, 0, 0);
-int prim = @primnum;
+int prim = i@primnum;
 int pts[] = primpoints(0, prim);
 
 foreach(int pt; pts)
@@ -218,15 +218,15 @@ p@orient = quaternion(matrix3(myTransform));
 
 /* -------------------------------------------------------------- */
 // vel along curve
-if(@ptnum>0){
-    v@v = @P-point(0,"P",@ptnum-1);
+if(i@ptnum>0){
+    v@v = @P-point(0,"P",i@ptnum-1);
 }else{
-    v@v = point(0,"P",@ptnum+1)-@P;
+    v@v = point(0,"P",i@ptnum+1)-@P;
 }
 
 /* -------------------------------------------------------------- */
 // keep first or last points on the curves (run over primitives)
-int p[] = primpoints(0,@primnum);
+int p[] = primpoints(0,i@primnum);
 foreach (int num; p) {
     if(chi("keep_last_or_first_point_on_curve")==1){
         if(num!=p[0])removepoint(0,num,1);
@@ -237,25 +237,25 @@ foreach (int num; p) {
 
 /* -------------------------------------------------------------- */
 // keep first and last points on the curves (run over primitives)
-int p[] = primpoints(0,@primnum);
+int p[] = primpoints(0,i@primnum);
 foreach (int num; p) {   
     if(num!=p[0] && num!=p[len(p)-1])removepoint(0,num,1);  
 }
 
 /* -------------------------------------------------------------- */
 // ramp from distance to points
-int handle = pcopen(1,"P",@P,chf("radius"),1);
+int handle = pcopen(1,"P",v@P,chf("radius"),1);
 float d = 0;
 if(pcnumfound(handle)>0){
     vector p = pcfilter(handle,"P");
-    d = fit(distance(@P,p),0,chf("radius"),1,0);
+    d = fit(distance(v@P,p),0,chf("radius"),1,0);
 }
-@Cd=pow(d,chf("exp"))+{0,0,1};
+v@Cd=pow(d,chf("exp"))+{0,0,1};
 
 /* -------------------------------------------------------------- */
 // remove prims with less than 3 points
-int pts[] = primpoints( 0, @primnum );
-if( len(pts) < 3 ) removeprim( 0, @primnum, 1 );
+int pts[] = primpoints( 0, i@primnum );
+if( len(pts) < 3 ) removeprim( 0, i@primnum, 1 );
 
 /* -------------------------------------------------------------- */
 // ramp from distance to surface 
@@ -263,10 +263,10 @@ int prim;
 vector uv;
 float dmin = chf("dist_min");
 float dmax = chf("dist_max");
-float d = xyzdist(1,@P,prim,uv,dmax);
+float d = xyzdist(1,v@P,prim,uv,dmax);
 float f = fit(d,dmin,dmax,0,1);
 if(chi("reverse_direction")==1)f=fit01(f,1,0);
-@Cd = f + {0,0,1};
+v@Cd = f + {0,0,1};
 
 /* -------------------------------------------------------------- */
 // delete by proximity to surface (run over points)
