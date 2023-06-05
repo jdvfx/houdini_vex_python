@@ -4,9 +4,9 @@
 
 //* -------------------------------------------------------------- */
 // keep point in proximity (or cull by proximity)
-int pt_found = pcnumfound(pcopen(1,"P",@P,chf("radius"),1));
+int pt_found = pcnumfound(pcopen(1,"P",v@P,chf("radius"),1));
 if(pt_found == chi("reverse_selection")){
-        removepoint(0,@ptnum,1);
+        removepoint(0,i@ptnum,1);
 }
 /* -------------------------------------------------------------- */
 // rotate vel around axis
@@ -38,31 +38,31 @@ v@up = qrotate(p@orient, {0,1,0});
 v@N = qrotate(p@orient, {0,0,1});
 /* -------------------------------------------------------------- */
 // rainbow XYZ
-v@Cd = relbbox(0,@P);
+v@Cd = relbbox(0,v@P);
 /* -------------------------------------------------------------- */
 // ramp by proximity to point (pointcloud)
-int handle = pcopen(1,"P",@P,chf("radius"),chi("maxpoints"));
+int handle = pcopen(1,"P",v@P,chf("radius"),chi("maxpoints"));
 float d = 0;
 if(pcnumfound(handle)>0){
     vector p = pcfilter(handle,"P");
-    d = fit(distance(@P,p),0,chf("radius"),1,0);
+    d = fit(distance(v@P,p),0,chf("radius"),1,0);
 }
-@Cd=d+{0,0,1};
+v@Cd=d+{0,0,1};
 /* -------------------------------------------------------------- */
 // ramp by proximity to surface
 int prim;
 vector uv;
-float f = xyzdist(1,@P,prim,uv,chf("dist_max"));
-@Cd = fit(f,chf("dist_min"),chf("dist_max"),1,0)+{0,0,1};
+float f = xyzdist(1,v@P,prim,uv,chf("dist_max"));
+v@Cd = fit(f,chf("dist_min"),chf("dist_max"),1,0)+{0,0,1};
 /* -------------------------------------------------------------- */
 // cull points outside/inside bounds 
-vector r = relbbox(1,@P);
+vector r = relbbox(1,v@P);
 if(r.x>1||r.y>1||r.z>1||r.x<0||r.y<0||r.z<0){
-    removepoint(0,@ptnum);
+    removepoint(0,i@ptnum);
 }
 /* -------------------------------------------------------------- */
 // fade volume edges (bounds)
-vector r = relbbox(0,@P);
+vector r = relbbox(0,v@P);
 float o = chf("padding");
 float s = chf("fade_start");
 float d = fit(r.x,s,o,0,1)*fit(r.x,1-s,1-o,0,1)*fit(r.y,s,o,0,1)*fit(r.y,1-s,1-o,0,1)*fit(r.z,s,o,0,1)*fit(r.z,1-s,1-o,0,1);
@@ -71,7 +71,7 @@ f@density *= d;
 // point decimate
 int ptvar = i@ptnum;
 if (chi("use_id")) ptvar = i@id;
-if(rand(ptvar+chf("seed"))>chf("threshold"))removepoint(0,@ptnum);
+if(rand(ptvar+chf("seed"))>chf("threshold"))removepoint(0,i@ptnum);
 /* -------------------------------------------------------------- */
 // Sigmoid  function
 // x  : input value
@@ -83,7 +83,6 @@ float sigmoid(float x, k, x0){
     return 1.0 / (1.0 + exp(-k * (x - x0)));
     // TODO: lerp each to 0 and 1
 }
-
 
 // --- TO DO ... test VEX below
 /* -------------------------------------------------------------- */
@@ -101,7 +100,7 @@ p@orient = quaternion(axis);
 /* -------------------------------------------------------------- */
 // 4D CurlX noise with FBM octaves
 vector4 P4;
-P4 = @P;
+P4 = v@P;
 setcomp(P4, chf("noise_time"), 3);
 float c =0;
 
@@ -118,28 +117,25 @@ for(int i=0;i<chi("octaves");i++){
     freq*= 2;
 }
 
-@Cd=(c/maxval)*chf("mult");
+v@Cd=(c/maxval)*chf("mult");
 
 /* -------------------------------------------------------------- */
 // filter by size (max axis) when using packed primitives
-vector b = primintrinsic(0,"bounds",@primnum);
+vector b = primintrinsic(0,"bounds",i@primnum);
 float sx = b[1]-b[0];
 float sy = b[3]-b[2];
 float sz = b[5]-b[4];
-if(max(max(sx,sy),sz)<chf("max_axis"))removeprim(0,@primnum,1);
+if(max(max(sx,sy),sz)<chf("max_axis"))removeprim(0,i@primnum,1);
 
 /* -------------------------------------------------------------- */
 // Average Neighbouring Normals
-int n[] = neighbours(0, @ptnum);
+int n[] = neighbours(0, i@ptnum);
 vector avgN = v@N;
 foreach (int pt; n){
     avgN += point(0, "N", pt);
 }
 avgN /= len(n)+1;
 v@N = avgN;
-
-
-
 
 /* -------------------------------------------------------------- */
 // onoise 3D 
@@ -161,8 +157,6 @@ v@P-=pivot;
 v@P*=m;
 v@P+=pivot;
 v@P+=p-pivot;
-
-
 
 /* -------------------------------------------------------------- */
 // random color from name attribute
@@ -221,7 +215,7 @@ p@orient = quaternion(matrix3(myTransform));
 if(i@ptnum>0){
     v@v = @P-point(0,"P",i@ptnum-1);
 }else{
-    v@v = point(0,"P",i@ptnum+1)-@P;
+    v@v = point(0,"P",i@ptnum+1)-v@P;
 }
 
 /* -------------------------------------------------------------- */
@@ -272,14 +266,14 @@ v@Cd = f + {0,0,1};
 // delete by proximity to surface (run over points)
 int prim;
 vector uv;
-float d = xyzdist(1,@P,prim,uv,chf("maxdist"));
+float d = xyzdist(1,v@P,prim,uv,chf("maxdist"));
 if(chi("invert_selection")==1){
      if(d<chf("maxdist")){
-         removepoint(0,@ptnum);
+         removepoint(0,i@ptnum);
      }
 }else{
     if(d>=chf("maxdist")){
-        removepoint(0,@ptnum);
+        removepoint(0,i@ptnum);
     }
 }
 
@@ -287,12 +281,12 @@ if(chi("invert_selection")==1){
 // create u attribute along one curve (run over points)
 f@u = float(i@ptnum)/float(npoints(0));
 if(chi("display_u")==1){
-	@Cd=f@u+{0,0,1}; 
+	v@Cd=f@u+{0,0,1}; 
 }
 
 /* -------------------------------------------------------------- */
 // create u attribute along curves (run over primitives)
-int p[] = primpoints(0,@primnum);
+int p[] = primpoints(0,i@primnum);
 float u;
 int l = len(p);
 for(int i=0;i<l;i++){
@@ -307,16 +301,16 @@ for(int i=0;i<l;i++){
 
 /* -------------------------------------------------------------- */
 // velocity along one curve (run over points)
-if(@ptnum>0){
-    v@v = @P-point(0,"P",@ptnum-1);
+if(i@ptnum>0){
+    v@v = v@P-point(0,"P",i@ptnum-1);
 }else{
-    v@v = point(0,"P",@ptnum+1)-@P;
+    v@v = point(0,"P",i@ptnum+1)-v@P;
 }
 if(chi("reverse_direction")==1)v@v*=-1;
 
 /* -------------------------------------------------------------- */
 // vel along multiple curves (run over primitives)
-int p[] = primpoints(0,@primnum);
+int p[] = primpoints(0,i@primnum);
 for(int i=0;i<len(p);i++)  {
     vector v=vector(0);
     if(i>0){
@@ -333,31 +327,31 @@ for(int i=0;i<len(p);i++)  {
 // density mask (input 2)
 float d = 1;
 if(chi("dMask_useMask")==1){
-    vector mask_pos_noise = anoise(@P*chf("dMask_pn_freq")+chv("dMask_pn_offset"), chi("dMask_pn_turb"), chf("dMask_pn_rough"), chf("dMask_pn_atten"))*chf("dMask_pn_mult");
-    d=pow(fit(volumesample(1,0,@P+mask_pos_noise),0,chf("dMask_max_density"),1,0),chf("dMask_density_exp"));
+    vector mask_pos_noise = anoise(v@P*chf("dMask_pn_freq")+chv("dMask_pn_offset"), chi("dMask_pn_turb"), chf("dMask_pn_rough"), chf("dMask_pn_atten"))*chf("dMask_pn_mult");
+    d=pow(fit(volumesample(1,0,v@P+mask_pos_noise),0,chf("dMask_max_density"),1,0),chf("dMask_density_exp"));
 }
 // noise mask (aligator)
 float mask = 1;
 if(chi("nMask_useMask")==1){
-    mask =  clamp(pow(anoise(@P*chf("nMask_freq")+chv("nMask_offset"), chi("nMask_turb"), chf("nMask_rough"), chf("nMask_atten")),chf("nMask_exp"))*chf("nMask_mult"),0,1);
+    mask =  clamp(pow(anoise(v@P*chf("nMask_freq")+chv("nMask_offset"), chi("nMask_turb"), chf("nMask_rough"), chf("nMask_atten")),chf("nMask_exp"))*chf("nMask_mult"),0,1);
 } 
 // noise 1 (fbm)
-vector n1p = vop_fbmNoiseVV(@P*chf("n1_pn_Freq")+chv("n1_pn_Offset"),chf("n1_pn_rough"),chi("n1_pn_turb"),"noise");
+vector n1p = vop_fbmNoiseVV(v@P*chf("n1_pn_Freq")+chv("n1_pn_Offset"),chf("n1_pn_rough"),chi("n1_pn_turb"),"noise");
 vector n1 = vop_fbmNoiseVV(n1p*chf("n1_Freq")+chv("n1_Offset"),chf("n1_rough"),chi("n1_turb"),"noise");
 // noise 2 (fbm)
-vector n2p = vop_fbmNoiseVV(@P*chf("n2_pn_Freq")+chv("n2_pn_Offset"),chf("n2_pn_rough"),chi("n2_pn_turb"),"noise");
+vector n2p = vop_fbmNoiseVV(v@P*chf("n2_pn_Freq")+chv("n2_pn_Offset"),chf("n2_pn_rough"),chi("n2_pn_turb"),"noise");
 vector n2 = vop_fbmNoiseVV(n2p*chf("n2_Freq")+chv("n2_Offset"),chf("n2_rough"),chi("n2_turb"),"noise");
 // sample displaced density
-@density = volumesample(0,0,@P+(n1*chf("n1_mult")+n2*chf("n2_mult"))*mask*d*chf("advection_length"));
+f@density = volumesample(0,0,v@P+(n1*chf("n1_mult")+n2*chf("n2_mult"))*mask*d*chf("advection_length"));
 
 /* -------------------------------------------------------------- */
 // rotate quaternion around axis
 matrix3 m;
 matrix3 rm;
-m = qconvert(@orient);
+m = qconvert(p@orient);
 vector axis = chv("axis");
 rotate(m, radians(chf("angle_in_degrees"), axis);    
-@orient = quaternion(m);
+p@orient = quaternion(m);
 
 /* -------------------------------------------------------------- */
 // intersection of 2 bounds
@@ -365,18 +359,18 @@ vector m1,M1,m2,M2;
 getbbox(0,m1,M1);
 getbbox(1,m2,M2);
 if(m2.x>M1.x || M2.x< m1.x || m2.y>M1.y || M2.y< m1.y || m2.z>M1.z || M2.z< m1.z){
-    removepoint(0,@ptnum);
+    removepoint(0,i@ptnum);
 }else{
-    @P.x=min(M1.x,max(@P.x,m2.x),M2.x);
-    @P.y=min(M1.y,max(@P.y,m2.y),M2.y);
-    @P.z=min(M1.z,max(@P.z,m2.z),M2.z);
+    v@P.x=min(M1.x,max(v@P.x,m2.x),M2.x);
+    v@P.y=min(M1.y,max(v@P.y,m2.y),M2.y);
+    v@P.z=min(M1.z,max(v@P.z,m2.z),M2.z);
 }
 
 /* -------------------------------------------------------------- */
 // divscale disturbance
-if(@density< chf("max_density")){
+if(f@density< chf("max_density")){
 
-    float speed = length(@vel);
+    float speed = length(v@vel);
     if(speed>chf("min_speed")){
 
         vector4 hvec;
@@ -402,15 +396,15 @@ if(@density< chf("max_density")){
 
 /* -------------------------------------------------------------- */
 // volume motion blur using vel from second input (not VDB)
-float vx=volumesample(1,0,@P);
-float vy=volumesample(1,1,@P);
-float vz=volumesample(1,2,@P);
+float vx=volumesample(1,0,v@P);
+float vy=volumesample(1,1,v@P);
+float vz=volumesample(1,2,v@P);
 vector v = set(vx,vy,vz);
 if(length(v)>0){
     float dsum=0;
     for(int i=0;i< chi("steps");i++){
         float f = float(i)/float(chi("steps")-1);
-        dsum += volumesample(0,0,@P+v*chf("displacement")*f);
+        dsum += volumesample(0,0,v@P+v*chf("displacement")*f);
     }
     f@density = dsum /float(chi("steps"));
 }
@@ -419,7 +413,7 @@ if(length(v)>0){
 // 3d fbm noise - for vel
 #include 
 // noise 1
-vector n1p = vop_fbmNoiseVV(@P*chf("noise1Pos_Freq")+chv("noise1Pos_Offset"),chf("noise1Pos_Roughness"),chi("noise1Pos_Turbulence"),"noise");
+vector n1p = vop_fbmNoiseVV(v@P*chf("noise1Pos_Freq")+chv("noise1Pos_Offset"),chf("noise1Pos_Roughness"),chi("noise1Pos_Turbulence"),"noise");
 vector n1 = vop_fbmNoiseVV(n1p*chf("noise1_Freq")+chv("noise1_Offset"),chf("noise1_Roughness"),chi("noise1_Turbulence"),"noise");
 // noise 2
 v@vel = n1;
@@ -430,9 +424,7 @@ f@density = efit(pow(efit(f@density,0,chf("max_density"),0,1),chf("exp")),0,1,0,
 
 //////////////////////////////////////////////////////////////////// 
 // mask
-f@density =  clamp(pow(anoise(@P*chf("mask_freq")+chv("mask_offset"), chi("mask_turbulence"), chf("mask_roughness"), chf("mask_attenuation")),chf("mask_exp"))*chf("mask_mult"),0,1);
-
-
+f@density =  clamp(pow(anoise(v@P*chf("mask_freq")+chv("mask_offset"), chi("mask_turbulence"), chf("mask_roughness"), chf("mask_attenuation")),chf("mask_exp"))*chf("mask_mult"),0,1);
 
 /* -------------------------------------------------------------- */
 //EXTRACTING TRANSFORMS
@@ -440,15 +432,15 @@ f@density =  clamp(pow(anoise(@P*chf("mask_freq")+chv("mask_offset"), chi("mask_
 //returns the translate (c=0), rotate (c=1), or scale (c=2)
 //component of the transform (xform)
 //
-matrix xform = primintrinsic(1, "packedfulltransform", @ptnum);
-//matrix xform = primintrinsic(1, "transform", @ptnum);
+matrix xform = primintrinsic(1, "packedfulltransform", i@ptnum);
+//matrix xform = primintrinsic(1, "transform", i@ptnum);
 
 #define XFORM_SRT       0  // Scale Rotate Translate
 #define XFORM_XYZ       0 // Rx Ry Rz
 
 int trs = XFORM_XYZ; //Transform Order
 int xyz = XFORM_SRT; //Rotation Order
-vector p = @P; //pivot for crack/extracting transforms
+vector p = v@P; //pivot for crack/extracting transforms
 vector translate = cracktransform(trs, xyz, 0 , p, xform);
 vector rotate    = cracktransform(trs, xyz, 1 , p, xform);
 vector scale    = cracktransform(trs, xyz, 2 , p, xform);
@@ -459,11 +451,11 @@ matrix newTrans = maketransform(trs, xyz, translate, rotate,{1,1,1});
 p@orient = quaternion(matrix3(newTrans));
 
 //rotation in degrees
-matrix matx = qconvert(@orient);
-vector extracted = cracktransform(0, 0, 1, @P, matx);
+matrix matx = qconvert(p@orient);
+vector extracted = cracktransform(0, 0, 1, v@P, matx);
 v@rotation = extracted;
 
-s@filename = primintrinsic(1, "filename", @ptnum);
+s@filename = primintrinsic(1, "filename", i@ptnum);
 
 v@scale = scale;
 
@@ -477,7 +469,7 @@ vector Cd = vector(0);
 vector p = v@P;
 int id = 0; 
 
-int handle = pcopen(0,"P",@P,chf("radius"),chi("maxpoints"));
+int handle = pcopen(0,"P",v@P,chf("radius"),chi("maxpoints"));
 if(pcnumfound(handle)>0){
     while(pciterate(handle)){
         
@@ -487,18 +479,18 @@ if(pcnumfound(handle)>0){
         
         if(id>i@id || use_id==0){
 
-            float dist = distance(@P,p);
+            float dist = distance(v@P,p);
             int steps  = int(dist / chf("stepsize"));
             for(int i=0;i< steps;i++){
             
                 float d = float(i)/float(steps);
-                vector r = (rand(@P*3927+i*537)*vector(2)-1);
-                vector p_ = lerp(@P,p,d)+r*chf("jitter");
+                vector r = (rand(v@P*3927+i*537)*vector(2)-1);
+                vector p_ = lerp(v@P,p,d)+r*chf("jitter");
                 
                 int newpoint = addpoint(0,p_);
                 
                 if(use_Cd){
-                    vector Cd_ = lerp(@Cd,Cd,d);            
+                    vector Cd_ = lerp(v@Cd,Cd,d);            
                     setpointattrib(0,"Cd",newpoint,Cd_);
                 }
             }
@@ -508,7 +500,7 @@ if(pcnumfound(handle)>0){
 
 /* -------------------------------------------------------------- */
 // volume camera cull
-vector pndc = toNDC(chs("camera_name"), @P);
+vector pndc = toNDC(chs("camera_name"), v@P);
 // padding
 float pad = chf("padding");
 if(pndc.x< 0-pad || pndc.x>1+pad || pndc.y< 0-pad || pndc.y>1+pad || pndc.z>=0 ){
@@ -517,7 +509,7 @@ if(pndc.x< 0-pad || pndc.x>1+pad || pndc.y< 0-pad || pndc.y>1+pad || pndc.z>=0 )
 
 /* -------------------------------------------------------------- */
 // bunker bullet auto freeze
-if(length(@v)< chf("min_vel")){
+if(length(v@v)< chf("min_vel")){
     f@s+=1;
     if(f@s>ch("min_vel_frames")){
         i@bullet_sleeping=1;
@@ -526,7 +518,7 @@ if(length(@v)< chf("min_vel")){
     f@s=0;
 }
 
-if(distance(@P,v@oldP)< chf("min_dist")){
+if(distance(v@P,v@oldP)< chf("min_dist")){
     f@d=f@d+1;
     if(f@d>ch("min_dist_frames")){
         v@v *= clamp(1-chf("drag"),0,1);
@@ -536,7 +528,7 @@ if(distance(@P,v@oldP)< chf("min_dist")){
     f@d=0;
 }
 // stash P
-v@oldP = @P;
+v@oldP = v@P;
 
 /* -------------------------------------------------------------- */
 // connect adjacent pieces
@@ -548,7 +540,7 @@ void line(vector pos1,pos2){
     int v2 = addvertex(0,prim,p2);
 }
 
-int handle = pcopen(0,"P",@P,chf("radius"),chi("maxpoints"));
+int handle = pcopen(0,"P",v@P,chf("radius"),chi("maxpoints"));
 if(pcnumfound(handle)>0){
     while(pciterate(handle)){
         int id;
@@ -556,31 +548,28 @@ if(pcnumfound(handle)>0){
         if(id!=i@pieceid){            
             vector p;
             pcimport(handle,"P",p);        
-            line(@P,p);                    
+            line(v@P,p);                    
         }     
     }
 }
 
 /* -------------------------------------------------------------- */
 // remove lone points (unconnected)
-if(neighbourcount(0,@ptnum)==0){
-    removepoint(0,@ptnum);
+if(neighbourcount(0,i@ptnum)==0){
+    removepoint(0,i@ptnum);
 }else{
     // collapse lines into points (centroids)
-    @P = (@P+point(0,"P",neighbour(0,@ptnum,0)))*.5;
+    v@P = (v@P+point(0,"P",neighbour(0,i@ptnum,0)))*.5;
 }
 
 /* -------------------------------------------------------------- */
 // vorticity
 // input 2 has vel.* volumes
-vector dx = volumegradient(1,"vel.x",@P);
-vector dy = volumegradient(1,"vel.y",@P);
-vector dz = volumegradient(1,"vel.z",@P);
+vector dx = volumegradient(1,"vel.x",v@P);
+vector dy = volumegradient(1,"vel.y",v@P);
+vector dz = volumegradient(1,"vel.z",v@P);
 vector w = set(dz.y-dy.z,dx.z-dz.x,dy.x-dx.y);
-@Cd = fit(length(w),0,chf("max_vorticity"),0,1)+{0,0,1};
-
-
-
+v@Cd = fit(length(w),0,chf("max_vorticity"),0,1)+{0,0,1};
 
 /* -------------------------------------------------------------- */
 // SOP ambient occlusion
@@ -600,13 +589,10 @@ float bias = chf('bias'); // 0.5
 
 for (int i = 0; i<rays; i++ ) {
     raydir = sample_direction_cone(v@N,conewidth,vector2(rand(i*234524)));
-    hitprim = intersect(0,@P+(v@N*0.001), raydir*maxdist, hit, u, v);
-    hitprim_2 = intersect(1,@P+(v@N*0.001), raydir*maxdist, hit, u, v);
+    hitprim = intersect(0,v@P+(v@N*0.001), raydir*maxdist, hit, u, v);
+    hitprim_2 = intersect(1,v@P+(v@N*0.001), raydir*maxdist, hit, u, v);
     if (hitprim!=-1 || hitprim_2!=-1) tempOcc+=1;
 }
 
 float occ = clamp(vop_bias(1.0-(tempOcc / rays), bias), 0, 1);
-@Cd=occ;
-
-/* -------------------------------------------------------------- */
-
+v@Cd=occ;
