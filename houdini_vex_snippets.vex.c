@@ -1,7 +1,6 @@
 /* ####################
    Houdini VEX snippets
    #################### */
-//
 
 //* -------------------------------------------------------------- */
 // keep point in proximity (or cull by proximity)
@@ -85,7 +84,6 @@ float sigmoid(float x, k, x0){
     // TODO: lerp each to 0 and 1
 }
 
-
 // --- TO DO ... test VEX below
 /* -------------------------------------------------------------- */
 // pop rotate orient using v
@@ -139,9 +137,6 @@ foreach (int pt; n){
 avgN /= len(n)+1;
 v@N = avgN;
 
-
-
-
 /* -------------------------------------------------------------- */
 // onoise 3D 
 vector n3 =onoise (v@P*chf("n3_freq")+chv("n3_offset"),chi("n3_turb"),ch("n3_rough"),ch("n3_atten"))*vector(chf("n3_amp"));
@@ -162,8 +157,6 @@ v@P-=pivot;
 v@P*=m;
 v@P+=pivot;
 v@P+=p-pivot;
-
-
 
 /* -------------------------------------------------------------- */
 // random color from name attribute
@@ -433,8 +426,6 @@ f@density = efit(pow(efit(f@density,0,chf("max_density"),0,1),chf("exp")),0,1,0,
 // mask
 f@density =  clamp(pow(anoise(v@P*chf("mask_freq")+chv("mask_offset"), chi("mask_turbulence"), chf("mask_roughness"), chf("mask_attenuation")),chf("mask_exp"))*chf("mask_mult"),0,1);
 
-
-
 /* -------------------------------------------------------------- */
 //EXTRACTING TRANSFORMS
 //Depending on the value of c,
@@ -580,9 +571,6 @@ vector dz = volumegradient(1,"vel.z",v@P);
 vector w = set(dz.y-dy.z,dx.z-dz.x,dy.x-dx.y);
 v@Cd = fit(length(w),0,chf("max_vorticity"),0,1)+{0,0,1};
 
-
-
-
 /* -------------------------------------------------------------- */
 // SOP ambient occlusion
 // code from: Labs calculate occlusion
@@ -608,6 +596,3 @@ for (int i = 0; i<rays; i++ ) {
 
 float occ = clamp(vop_bias(1.0-(tempOcc / rays), bias), 0, 1);
 v@Cd=occ;
-
-/* -------------------------------------------------------------- */
-
