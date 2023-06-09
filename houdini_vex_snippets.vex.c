@@ -87,18 +87,23 @@ float sigmoid(float x, k, x0){
 /* -------------------------------------------------------------- */
 // POP wrangle
 // rotate orient using v
-vector up = {0,1,0};
-vector axis = cross(up,normalize(v@v));
-float r = fit01(rand(i@id),chf("rot_min"),chf("rot_max"));
-// random rotation direction (sign)
-if(rand(i@id+chf("seed"))>0.5)r*=-1;
-vector4 rot = quaternion(radians(r*length(v@v)),axis);
-p@orient = qmultiply(p@orient, rot);
+if(length(v@v)>chf("min_speed_for_rotation")){
+    vector up = {0,1,0};
+    vector axis = cross(up,normalize(v@v));
+    float r = fit01(pow(rand(i@id-chf("seed")),2),chf("rotation_speed_min"),chf("rotation_speed_max"));
+    // random rotation direction (sign)
+    //if(rand(i@id+chf("seed"))>0.5)r*=-1;
+    vector4 rot = quaternion(radians(r*length(v@v)),axis);
+    p@orient = qmultiply(p@orient, rot);
+}
 
 /* -------------------------------------------------------------- */
-// random orient - TODO: need 360 distribution
-vector axis = normalize(rand(v@P*chf("seed"))*vector(2)-1);
-p@orient = quaternion(axis);
+// random orient 
+vector Xaxis = normalize(rand(i@ptnum*89.3)*vector(2)-1);
+vector Yaxis = normalize(rand(i@ptnum*73.5)*vector(2)-1);
+vector Zaxis = cross(Xaxis,Yaxis);
+matrix myTransform = set(Xaxis,Yaxis,Zaxis,v@P);
+p@orient = quaternion(matrix3(myTransform));
 
 /* -------------------------------------------------------------- */
 // POP wrangle
@@ -113,7 +118,6 @@ if(f@hittime>(2/24.0) && abs(f@hittime-f@Time)<chf("threshold")){
         i@stopped = 1;
     }
 }
-
 
 
 /* -------------------------------------------------------------- */
