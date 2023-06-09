@@ -84,18 +84,42 @@ float sigmoid(float x, k, x0){
     // TODO: lerp each to 0 and 1
 }
 
-// --- TO DO ... test VEX below
 /* -------------------------------------------------------------- */
-// pop rotate orient using v
+// POP wrangle
+// rotate orient using v
 vector up = {0,1,0};
 vector axis = cross(up,normalize(v@v));
-vector4 rot = quaternion(radians(ch('rotation_speed')*length(v@v)),axis);
+float r = fit01(rand(i@id),chf("rot_min"),chf("rot_max"));
+// random rotation direction (sign)
+if(rand(i@id+chf("seed"))>0.5)r*=-1;
+vector4 rot = quaternion(radians(r*length(v@v)),axis);
 p@orient = qmultiply(p@orient, rot);
 
 /* -------------------------------------------------------------- */
 // random orient - TODO: need 360 distribution
 vector axis = normalize(rand(v@P*chf("seed"))*vector(2)-1);
 p@orient = quaternion(axis);
+
+/* -------------------------------------------------------------- */
+// POP wrangle
+// randomize vel direction on impact
+// add drag, stop when slow
+if(f@hittime>(2/24.0) && abs(f@hittime-f@Time)<chf("threshold")){
+    float speed = length(v@v) * clamp(1-chf("drag"),0,1);
+    vector r = rand(v@P*chf("seed"))*vector(2)-1;
+    v@v += r*chf("rand_direction")*speed;
+    v@v = normalize(v@v)*speed;
+    if(speed<chf("min_speed")){
+        i@stopped = 1;
+    }
+}
+
+
+
+/* -------------------------------------------------------------- */
+// ####  TO DO ... test VEX below                            #####
+/* -------------------------------------------------------------- */
+
 
 /* -------------------------------------------------------------- */
 // 4D CurlX noise with FBM octaves
