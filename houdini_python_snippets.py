@@ -1,3 +1,20 @@
+
+# -----------------------------------------------------
+def find_displayed_node():
+    # find current network editor pane
+    # find node with display flag ON
+    for pane in hou.ui.currentPaneTabs():
+        if isinstance(pane,hou.NetworkEditor):
+            for node in pane.pwd().children():
+                display_flag = None
+                try:
+                    display_flag = node.isDisplayFlagSet()
+                except Exception:
+                    pass
+                if display_flag:
+                    return node
+    return None
+# -----------------------------------------------------
 # get current camera (python)
 def getCurrentCamera():
     for i in hou.ui.currentPaneTabs():
@@ -5,7 +22,6 @@ def getCurrentCamera():
             return i.curViewport().camera().path()
             break
 # -----------------------------------------------------
-
 # walk down chain of nodes and get the last node
 # useful to trigger a ROP job, from SOP
 def branch_down(node):
@@ -15,7 +31,6 @@ def branch_down(node):
     else:      
         return branch_down(out[0])
 # -----------------------------------------------------
-# --------
 # sim time
 # --------
 import os
@@ -75,11 +90,9 @@ if selected_nodes:
         time_diff = timedelta(seconds=time_diff_seconds)
         
         print(f"\n> total cache time: {str(time_diff)}")
-# -----------------------------------------------------
-#
 # ------------------------------------------------
 # get lastest written bgeo.sc and go to that frame
-# ------------------------------------------------
+# 
 import os
 
 selected_nodes = hou.selectedNodes()
