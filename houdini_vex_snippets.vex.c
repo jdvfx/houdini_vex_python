@@ -1,7 +1,3 @@
-/* ####################
-   Houdini VEX snippets
-   #################### */
-
 //* -------------------------------------------------------------- */
 // keep point in proximity (or cull by proximity)
 int pt_found = pcnumfound(pcopen(1,"P",v@P,chf("radius"),1));
@@ -83,7 +79,6 @@ float sigmoid(float x, k, x0){
     return 1.0 / (1.0 + exp(-k * (x - x0)));
     // TODO: lerp each to 0 and 1
 }
-
 /* -------------------------------------------------------------- */
 // POP wrangle
 // rotate orient using v
@@ -96,7 +91,6 @@ if(length(v@v)>chf("min_speed_for_rotation")){
     vector4 rot = quaternion(radians(r*length(v@v)),axis);
     p@orient = qmultiply(p@orient, rot);
 }
-
 /* -------------------------------------------------------------- */
 // random orient 
 vector Xaxis = normalize(rand(i@ptnum*89.3)*vector(2)-1);
@@ -104,7 +98,6 @@ vector Yaxis = normalize(rand(i@ptnum*73.5)*vector(2)-1);
 vector Zaxis = cross(Xaxis,Yaxis);
 matrix myTransform = set(Xaxis,Yaxis,Zaxis,v@P);
 p@orient = quaternion(matrix3(myTransform));
-
 /* -------------------------------------------------------------- */
 // POP wrangle
 // randomize vel direction on impact
@@ -118,8 +111,6 @@ if(f@hittime>(2/24.0) && abs(f@hittime-f@Time)<chf("threshold")){
         i@stopped = 1;
     }
 }
-
-
 /* -------------------------------------------------------------- */
 // ####  TO DO ... test VEX below                            #####
 /* -------------------------------------------------------------- */
@@ -624,3 +615,10 @@ for (int i = 0; i<rays; i++ ) {
 
 float occ = clamp(vop_bias(1.0-(tempOcc / rays), bias), 0, 1);
 v@Cd=occ;
+
+// -----------------------------------------------------------------
+// hue shift
+vector hsv = rgbtohsv(@Cd);
+hsv.x+=chf("hue_shift");
+@Cd= hsvtorgb(hsv);
+
