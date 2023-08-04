@@ -1,11 +1,11 @@
 //* -------------------------------------------------------------- */
-// keep point in proximity (or cull by proximity)
+// keep point in #proximity (or #cull by proximity)
 int pt_found = pcnumfound(pcopen(1,"P",v@P,chf("radius"),1));
 if(pt_found == chi("reverse_selection")){
         removepoint(0,i@ptnum,1);
 }
 /* -------------------------------------------------------------- */
-// rotate vel around axis
+// #rotate vel around axis
 float angle = radians(chf("angle_in_degrees"));
 vector axis = chv("axis");
 v@v = qrotate(quaternion(angle, axis),v@v);
@@ -29,7 +29,7 @@ line(p0,p1);
 line(p0,p2);
 line(p0,p3);
 /* -------------------------------------------------------------- */
-// orient to N and up 
+// #orient to N and up 
 v@up = qrotate(p@orient, {0,1,0});
 v@N = qrotate(p@orient, {0,0,1});
 /* -------------------------------------------------------------- */
@@ -45,31 +45,31 @@ if(pcnumfound(handle)>0){
 }
 v@Cd=d+{0,0,1};
 /* -------------------------------------------------------------- */
-// ramp by proximity to surface
+// #ramp by #proximity to #surface
 int prim;
 vector uv;
 float f = xyzdist(1,v@P,prim,uv,chf("dist_max"));
 v@Cd = fit(f,chf("dist_min"),chf("dist_max"),1,0)+{0,0,1};
 /* -------------------------------------------------------------- */
-// cull points outside/inside bounds 
+// #cull points outside/inside #bounds 
 vector r = relbbox(1,v@P);
 if(r.x>1||r.y>1||r.z>1||r.x<0||r.y<0||r.z<0){
     removepoint(0,i@ptnum);
 }
 /* -------------------------------------------------------------- */
-// fade volume edges (bounds)
+// #fade #volume edges (bounds)
 vector r = relbbox(0,v@P);
 float o = chf("padding");
 float s = chf("fade_start");
 float d = fit(r.x,s,o,0,1)*fit(r.x,1-s,1-o,0,1)*fit(r.y,s,o,0,1)*fit(r.y,1-s,1-o,0,1)*fit(r.z,s,o,0,1)*fit(r.z,1-s,1-o,0,1);
 f@density *= d;
 /* -------------------------------------------------------------- */
-// point decimate
+// #point #decimate
 int ptvar = i@ptnum;
 if (chi("use_id")) ptvar = i@id;
 if(rand(ptvar+chf("seed"))>chf("threshold"))removepoint(0,i@ptnum);
 /* -------------------------------------------------------------- */
-// Sigmoid  function
+// #sigmoid  function
 // x  : input value
 // k  : steepness of the sigmoid curve
 // x0 : midpoint of the curve
@@ -80,8 +80,7 @@ float sigmoid(float x, k, x0){
     // TODO: lerp each to 0 and 1
 }
 /* -------------------------------------------------------------- */
-// POP wrangle
-// rotate orient using v
+// #rotate #orient using v (#pop wrangle)
 if(length(v@v)>chf("min_speed_for_rotation")){
     vector up = {0,1,0};
     vector axis = cross(up,normalize(v@v));
@@ -92,15 +91,14 @@ if(length(v@v)>chf("min_speed_for_rotation")){
     p@orient = qmultiply(p@orient, rot);
 }
 /* -------------------------------------------------------------- */
-// random orient 
+// #random #orient 
 vector Xaxis = normalize(rand(i@ptnum*89.3)*vector(2)-1);
 vector Yaxis = normalize(rand(i@ptnum*73.5)*vector(2)-1);
 vector Zaxis = cross(Xaxis,Yaxis);
 matrix myTransform = set(Xaxis,Yaxis,Zaxis,v@P);
 p@orient = quaternion(matrix3(myTransform));
 /* -------------------------------------------------------------- */
-// POP wrangle
-// randomize vel direction on impact
+// randomize vel direction on impact (pop wrangle)
 // add drag, stop when slow
 if(f@hittime>(2/24.0) && abs(f@hittime-f@Time)<chf("threshold")){
     float speed = length(v@v) * clamp(1-chf("drag"),0,1);
@@ -117,7 +115,7 @@ if(f@hittime>(2/24.0) && abs(f@hittime-f@Time)<chf("threshold")){
 
 
 /* -------------------------------------------------------------- */
-// 4D CurlX noise with FBM octaves
+// 4D CurlX #noise with FBM octaves
 vector4 P4;
 P4 = v@P;
 setcomp(P4, chf("noise_time"), 3);
@@ -139,7 +137,7 @@ for(int i=0;i<chi("octaves");i++){
 v@Cd=(c/maxval)*chf("mult");
 
 /* -------------------------------------------------------------- */
-// filter by size (max axis) when using packed primitives
+// #filter by #size (max axis) when using packed primitives
 vector b = primintrinsic(0,"bounds",i@primnum);
 float sx = b[1]-b[0];
 float sy = b[3]-b[2];
@@ -157,15 +155,15 @@ avgN /= len(n)+1;
 v@N = avgN;
 
 /* -------------------------------------------------------------- */
-// onoise 3D 
+// #onoise 3D 
 vector n3 =onoise (v@P*chf("n3_freq")+chv("n3_offset"),chi("n3_turb"),ch("n3_rough"),ch("n3_atten"))*vector(chf("n3_amp"));
 
 /* -------------------------------------------------------------- */
-// onpoise 1D
+// #onoise 1D
 float n1 =onoise (v@P*chf("n1_freq")+chv("n1_offset"),chi("n1_turb"),ch("n1_rough"),ch("n1_atten"))*chf("n1_amp");
 
 /* -------------------------------------------------------------- */
-// transform geo with extractTransform as input 2
+// #transform geo with extractTransform as input 2
 vector pivot=point(1,"pivot",0);
 vector p =point(1,"P",0);
 p@orient = point(1,"orient",0);
@@ -197,7 +195,7 @@ i@nameindex=x;
 v@Cd=rand(x);
 
 /* -------------------------------------------------------------- */
-// minimun colour of neighbour points 
+// #minimun colour of neighbour points 
 int n[] = neighbours(0, i@ptnum);
 vector Cd = v@Cd;
 foreach (int pt; n){
@@ -221,7 +219,7 @@ foreach(int pt; pts)
 }
 
 /* -------------------------------------------------------------- */
-// v@N and v@up to p@orient
+// N + up to #orient
 vector Xaxis = normalize(v@N);
 vector Yaxis = normalize(v@up);
 vector Zaxis = cross(Xaxis,Yaxis);
@@ -230,7 +228,7 @@ matrix myTransform = set(Xaxis,Yaxis,Zaxis,center);
 p@orient = quaternion(matrix3(myTransform));
 
 /* -------------------------------------------------------------- */
-// vel along curve
+// vel #along #curve
 if(i@ptnum>0){
     v@v = @P-point(0,"P",i@ptnum-1);
 }else{
@@ -256,7 +254,7 @@ foreach (int num; p) {
 }
 
 /* -------------------------------------------------------------- */
-// ramp from distance to points
+// #ramp from #distance to #points
 int handle = pcopen(1,"P",v@P,chf("radius"),1);
 float d = 0;
 if(pcnumfound(handle)>0){
@@ -271,7 +269,7 @@ int pts[] = primpoints( 0, i@primnum );
 if( len(pts) < 3 ) removeprim( 0, i@primnum, 1 );
 
 /* -------------------------------------------------------------- */
-// ramp from distance to surface 
+// #ramp from #distance to #surface 
 int prim;
 vector uv;
 float dmin = chf("dist_min");
@@ -282,7 +280,7 @@ if(chi("reverse_direction")==1)f=fit01(f,1,0);
 v@Cd = f + {0,0,1};
 
 /* -------------------------------------------------------------- */
-// delete by proximity to surface (run over points)
+// #delete by #proximity to #surface (run over points)
 int prim;
 vector uv;
 float d = xyzdist(1,v@P,prim,uv,chf("maxdist"));
@@ -341,7 +339,7 @@ for(int i=0;i<len(p);i++)  {
 }
 
 /* -------------------------------------------------------------- */
-// clouds noise
+// #clouds #noise
 #include < voplib.h>
 // density mask (input 2)
 float d = 1;
@@ -364,7 +362,7 @@ vector n2 = vop_fbmNoiseVV(n2p*chf("n2_Freq")+chv("n2_Offset"),chf("n2_rough"),c
 f@density = volumesample(0,0,v@P+(n1*chf("n1_mult")+n2*chf("n2_mult"))*mask*d*chf("advection_length"));
 
 /* -------------------------------------------------------------- */
-// rotate quaternion around axis
+// #rotate #quaternion around #axis
 matrix3 m;
 matrix3 rm;
 m = qconvert(p@orient);
@@ -373,7 +371,7 @@ rotate(m, radians(chf("angle_in_degrees"), axis);
 p@orient = quaternion(m);
 
 /* -------------------------------------------------------------- */
-// intersection of 2 bounds
+// #intersection of 2 #bounds
 vector m1,M1,m2,M2;
 getbbox(0,m1,M1);
 getbbox(1,m2,M2);
@@ -386,24 +384,24 @@ if(m2.x>M1.x || M2.x< m1.x || m2.y>M1.y || M2.y< m1.y || m2.z>M1.z || M2.z< m1.z
 }
 
 /* -------------------------------------------------------------- */
-// divscale disturbance
+// divscale #disturbance
 if(f@density< chf("max_density")){
 
     float speed = length(v@vel);
     if(speed>chf("min_speed")){
 
         vector4 hvec;
-        vector _div = (v@P + rand(f@Frame-5) * chf("divscale"))/chf("divscale");
+        vector _div = (v@P + rand(f@Frame-32.47+chf("seed")) * chf("divscale"))/chf("divscale");
         hvec = _div;
-        setcomp(hvec, f@Frame+9, 3);
+        setcomp(hvec, f@Frame+94.42, 3);
         float r1 = float(random(hvec));
        
         if(r1>chf("threshold")){
        
             vector4 hvec2;
-            vector _div2 = (v@P + rand(f@Frame+55) * chf("divscale"))/chf("divscale");
+            vector _div2 = (v@P + rand(f@Frame+55.83+chf("seed")) * chf("divscale"))/chf("divscale");
             hvec2 = _div2;
-            setcomp(hvec2, f@Frame, 3);
+            setcomp(hvec2, f@Frame+41.12, 3);
             vector r3 = random(hvec2);
             vector d = vector(chf("disturbance"));
             vector r3_ = fit(r3,vector(0),vector(1),-d,d);
@@ -414,7 +412,7 @@ if(f@density< chf("max_density")){
 }
 
 /* -------------------------------------------------------------- */
-// volume motion blur using vel from second input (not VDB)
+// #volume #motionblur using vel from second input (not VDB)
 float vx=volumesample(1,0,v@P);
 float vy=volumesample(1,1,v@P);
 float vz=volumesample(1,2,v@P);
@@ -429,7 +427,7 @@ if(length(v)>0){
 }
 
 /* -------------------------------------------------------------- */
-// 3d fbm noise - for vel
+// 3d fbm #noise - for vel
 #include 
 // noise 1
 vector n1p = vop_fbmNoiseVV(v@P*chf("noise1Pos_Freq")+chv("noise1Pos_Offset"),chf("noise1Pos_Roughness"),chi("noise1Pos_Turbulence"),"noise");
@@ -479,7 +477,7 @@ s@filename = primintrinsic(1, "filename", i@ptnum);
 v@scale = scale;
 
 /* -------------------------------------------------------------- */
-// basic point clustering
+// basic #point #clustering
 // using point id (optional) and Cd (optional)
 
 int use_Cd = chi("use_Cd");
@@ -518,7 +516,7 @@ if(pcnumfound(handle)>0){
 }
 
 /* -------------------------------------------------------------- */
-// volume camera cull
+// #volume #camera #cull
 vector pndc = toNDC(chs("camera_name"), v@P);
 // padding
 float pad = chf("padding");
@@ -550,7 +548,7 @@ if(distance(v@P,v@oldP)< chf("min_dist")){
 v@oldP = v@P;
 
 /* -------------------------------------------------------------- */
-// connect adjacent pieces
+// #connect #adjacent #pieces
 void line(vector pos1,pos2){
     int p1 = addpoint(0,pos1);
     int p2 = addpoint(0,pos2);
@@ -573,7 +571,7 @@ if(pcnumfound(handle)>0){
 }
 
 /* -------------------------------------------------------------- */
-// remove lone points (unconnected)
+// remove #lone points (unconnected)
 if(neighbourcount(0,i@ptnum)==0){
     removepoint(0,i@ptnum);
 }else{
@@ -582,7 +580,7 @@ if(neighbourcount(0,i@ptnum)==0){
 }
 
 /* -------------------------------------------------------------- */
-// vorticity
+// #volume #vorticity (not VDB)
 // input 2 has vel.* volumes
 vector dx = volumegradient(1,"vel.x",v@P);
 vector dy = volumegradient(1,"vel.y",v@P);
@@ -591,7 +589,7 @@ vector w = set(dz.y-dy.z,dx.z-dz.x,dy.x-dx.y);
 v@Cd = fit(length(w),0,chf("max_vorticity"),0,1)+{0,0,1};
 
 /* -------------------------------------------------------------- */
-// SOP ambient occlusion
+// SOP #ambient #occlusion
 // code from: Labs calculate occlusion
 #include <voplib.h>
 
@@ -617,8 +615,78 @@ float occ = clamp(vop_bias(1.0-(tempOcc / rays), bias), 0, 1);
 v@Cd=occ;
 
 // -----------------------------------------------------------------
-// hue shift
+// #hue #shift
 vector hsv = rgbtohsv(@Cd);
 hsv.x+=chf("hue_shift");
 @Cd= hsvtorgb(hsv);
+// -----------------------------------------------------------------
+// #soft #clip (from pyro1 vfl)
+float softclip (
+      float f; // field value
+      float s; // start val for compression
+      float c; // compression
+   )
+{
+   float out = f;
+   if(f>s && c>0) {
+      float ki = 1.0 / c;
+      float w  = 1.0 / (c*log(10.0));
+      float v  = log10(pow(w,ki));
+      out = log10(pow((f-s)+w,ki)) - v + s;
+   }
+   return out;
+}
+// @P.y=softclip(@P.y,2,1); example usage
+// -----------------------------------------------------------------
+// delete polygons with only 2 points (lines)
+int a = len(primpoints(0,@primnum));
+if(a<3)removeprim(0,@primnum,1);
+// -----------------------------------------------------------------
+// #project on #sdf
+for(int i=0;i<chi("steps");i++){
+    @P.y-= chf("step_size");
+    float vs = volumesample(1,0,@P);
+    if(vs<0){
+        break;
+    }
+    if(i==chi("steps")-1){
+        removepoint(0,@ptnum,1);
+    }
+}
+// -----------------------------------------------------------------
+//convert #group to #attrib
+string groups[] = detailintrinsic(0, "primitivegroups");
+s[]@groups=groups;
+int a=0;
+foreach(string i; groups){   
+    if(inprimgroup(0,i,@primnum) == 1){
+        s@group=i;
+        break;
+    }
+    a++;
+}
+// random color from group number
+@Cd=rand(a);
+i@groupnum=a;
+// -----------------------------------------------------------------
+// #point #density (normalized)
+int pc = pcnumfound(pcopen(0,"P",@P,chf("radius"),chi("maxpoints")));
+float density = float(pc)/float(chi("maxpoints"));
+// -----------------------------------------------------------------
+// #volume #diffusion 
+float dsum = 0;
+float mask = 1; // could be from ramp,volume,noise 
 
+for(int i=0;i<chi("steps");i++){
+    vector n = (rand(v@P*2389.42+@Frame+i)*vector(2)-1)*chf("diffusion")*mask;
+    dsum += volumesample(0,0,@P+n);
+
+}
+f@density = dsum / float(chi("steps"));
+// -----------------------------------------------------------------
+// worley (#cell) #noise
+float dist1,dist2;
+wnoise(@P * chf("freq")+chv("offset"), chi("seed"), dist1, dist2);
+float cellnoise = dist1;
+// -----------------------------------------------------------------
+//
