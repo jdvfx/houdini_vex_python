@@ -10,33 +10,19 @@ float angle = radians(chf("angle_in_degrees"));
 vector axis = chv("axis");
 v@v = qrotate(quaternion(angle, axis),v@v);
 /* -------------------------------------------------------------- */
-// create coordinate system X,Y,Z
-// run over Detail
-void line(vector pos1,pos2){
-    int p1 = addpoint(0,pos1);
-    int p2 = addpoint(0,pos2);
-    int prim = addprim(0,"polyline");
-    int v1 = addvertex(0,prim,p1);
-    int v2 = addvertex(0,prim,p2);
-    setattrib(0,"prim","Cd",prim,0,pos2,"set");
-
-}
-vector p0 = vector(0);
-vector p1 = {1,0,0};
-vector p2 = {0,1,0};
-vector p3 = {0,0,1};
-line(p0,p1);
-line(p0,p2);
-line(p0,p3);
+// #rotate geometry around axis
+matrix transform = ident();
+rotate(transform,radians(chf("angle")),chv("axis"));
+v@P *= transform;
 /* -------------------------------------------------------------- */
 // #orient to N and up 
 v@up = qrotate(p@orient, {0,1,0});
 v@N = qrotate(p@orient, {0,0,1});
 /* -------------------------------------------------------------- */
-// rainbow XYZ
+// #rainbow XYZ
 v@Cd = relbbox(0,v@P);
 /* -------------------------------------------------------------- */
-// ramp by proximity to point (pointcloud)
+// #ramp by #proximity to #point (pointcloud)
 int handle = pcopen(1,"P",v@P,chf("radius"),chi("maxpoints"));
 float d = 0;
 if(pcnumfound(handle)>0){
@@ -98,7 +84,7 @@ vector Zaxis = cross(Xaxis,Yaxis);
 matrix myTransform = set(Xaxis,Yaxis,Zaxis,v@P);
 p@orient = quaternion(matrix3(myTransform));
 /* -------------------------------------------------------------- */
-// randomize vel direction on impact (pop wrangle)
+// randomize vel direction on #impact (#pop wrangle)
 // add drag, stop when slow
 if(f@hittime>(2/24.0) && abs(f@hittime-f@Time)<chf("threshold")){
     float speed = length(v@v) * clamp(1-chf("drag"),0,1);
@@ -145,7 +131,7 @@ float sz = b[5]-b[4];
 if(max(max(sx,sy),sz)<chf("max_axis"))removeprim(0,i@primnum,1);
 
 /* -------------------------------------------------------------- */
-// Average Neighbouring Normals
+// average neighbouring normals
 int n[] = neighbours(0, i@ptnum);
 vector avgN = v@N;
 foreach (int pt; n){
@@ -195,7 +181,7 @@ i@nameindex=x;
 v@Cd=rand(x);
 
 /* -------------------------------------------------------------- */
-// #minimun colour of neighbour points 
+// #minimun #color of neighbour points 
 int n[] = neighbours(0, i@ptnum);
 vector Cd = v@Cd;
 foreach (int pt; n){
@@ -295,14 +281,14 @@ if(chi("invert_selection")==1){
 }
 
 /* -------------------------------------------------------------- */
-// create u attribute along one curve (run over points)
+// create u attribute #along one #curve (run over points)
 f@u = float(i@ptnum)/float(npoints(0));
 if(chi("display_u")==1){
 	v@Cd=f@u+{0,0,1}; 
 }
 
 /* -------------------------------------------------------------- */
-// create u attribute along curves (run over primitives)
+// create u attribute #along #curves (run over primitives)
 int p[] = primpoints(0,i@primnum);
 float u;
 int l = len(p);
@@ -317,7 +303,7 @@ for(int i=0;i<l;i++){
 }
 
 /* -------------------------------------------------------------- */
-// velocity along one curve (run over points)
+// #velocity #along one #curve (run over points)
 if(i@ptnum>0){
     v@v = v@P-point(0,"P",i@ptnum-1);
 }else{
@@ -340,7 +326,7 @@ for(int i=0;i<len(p);i++)  {
 
 /* -------------------------------------------------------------- */
 // #clouds #noise
-#include < voplib.h>
+#include <voplib.h>
 // density mask (input 2)
 float d = 1;
 if(chi("dMask_useMask")==1){
@@ -384,7 +370,7 @@ if(m2.x>M1.x || M2.x< m1.x || m2.y>M1.y || M2.y< m1.y || m2.z>M1.z || M2.z< m1.z
 }
 
 /* -------------------------------------------------------------- */
-// divscale #disturbance
+// divscale #disturbance #dops
 if(f@density< chf("max_density")){
 
     float speed = length(v@vel);
@@ -444,26 +430,23 @@ f@density = efit(pow(efit(f@density,0,chf("max_density"),0,1),chf("exp")),0,1,0,
 f@density =  clamp(pow(anoise(v@P*chf("mask_freq")+chv("mask_offset"), chi("mask_turbulence"), chf("mask_roughness"), chf("mask_attenuation")),chf("mask_exp"))*chf("mask_mult"),0,1);
 
 /* -------------------------------------------------------------- */
-//EXTRACTING TRANSFORMS
-//Depending on the value of c,
-//returns the translate (c=0), rotate (c=1), or scale (c=2)
-//component of the transform (xform)
+// extracting transforms
 //
 matrix xform = primintrinsic(1, "packedfulltransform", i@ptnum);
-//matrix xform = primintrinsic(1, "transform", i@ptnum);
+// matrix xform = primintrinsic(1, "transform", i@ptnum);
 
-#define XFORM_SRT       0  // Scale Rotate Translate
-#define XFORM_XYZ       0 // Rx Ry Rz
+#define XFORM_SRT       0  // scale rotate translate
+#define XFORM_XYZ       0 // rx ry rz
 
-int trs = XFORM_XYZ; //Transform Order
-int xyz = XFORM_SRT; //Rotation Order
+int trs = XFORM_XYZ; //transform order
+int xyz = XFORM_SRT; //rotation order
 vector p = v@P; //pivot for crack/extracting transforms
 vector translate = cracktransform(trs, xyz, 0 , p, xform);
 vector rotate    = cracktransform(trs, xyz, 1 , p, xform);
 vector scale    = cracktransform(trs, xyz, 2 , p, xform);
 
 /* -------------------------------------------------------------- */
-//MAKE TRANSFORM
+// make transform
 matrix newTrans = maketransform(trs, xyz, translate, rotate,{1,1,1});
 p@orient = quaternion(matrix3(newTrans));
 
@@ -525,7 +508,7 @@ if(pndc.x< 0-pad || pndc.x>1+pad || pndc.y< 0-pad || pndc.y>1+pad || pndc.z>=0 )
 }
 
 /* -------------------------------------------------------------- */
-// bunker bullet auto freeze
+// #bullet auto freeze #dops
 if(length(v@v)< chf("min_vel")){
     f@s+=1;
     if(f@s>ch("min_vel_frames")){
@@ -589,7 +572,7 @@ vector w = set(dz.y-dy.z,dx.z-dz.x,dy.x-dx.y);
 v@Cd = fit(length(w),0,chf("max_vorticity"),0,1)+{0,0,1};
 
 /* -------------------------------------------------------------- */
-// SOP #ambient #occlusion
+// sop #ambient #occlusion
 // code from: Labs calculate occlusion
 #include <voplib.h>
 
@@ -654,7 +637,7 @@ for(int i=0;i<chi("steps");i++){
     }
 }
 // -----------------------------------------------------------------
-//convert #group to #attrib
+//convert #groups to #attrib
 string groups[] = detailintrinsic(0, "primitivegroups");
 s[]@groups=groups;
 int a=0;
@@ -689,4 +672,11 @@ float dist1,dist2;
 wnoise(@P * chf("freq")+chv("offset"), chi("seed"), dist1, dist2);
 float cellnoise = dist1;
 // -----------------------------------------------------------------
-//
+// #geometry #cleanup
+// remove polys with 2 lines
+// group polys with more than 4 points (#ngons)
+int points = len(primpoints(0,@primnum));
+if(points<3)removeprim(0,@primnum,1);
+if(points>4)@group_ngons=1;
+// -----------------------------------------------------------------
+
