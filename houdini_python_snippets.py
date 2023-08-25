@@ -1,4 +1,53 @@
+# -----------------------------------------------------
+# Freeze Bounds
+# create box with hardcoded bounds values 
+n = hou.selectedNodes()[0]
 
+pos = n.position()
+box = n.parent().createNode("box")
+box.setPosition((pos[0],pos[1]-1))
+
+axis = ['x','y','z']
+
+for a in axis:
+    s = 'bbox("'+n.path()+'",D_'+a.upper()+'SIZE)'
+    box.parm("size"+a).setExpression(s)
+    box.parm("size"+a).deleteAllKeyframes()
+
+    t = 'centroid("'+n.path()+'",D_'+a.upper()+')'
+    box.parm("t"+a).setExpression(t)
+    box.parm("t"+a).deleteAllKeyframes()
+# -----------------------------------------------------
+# create an object merge with ref from sected node (Ctrl+!)
+for i in hou.selectedNodes():
+    m = i.parent().createNode("object_merge")
+    o = "IN_"+i.name()+"_"    
+    n = 0         
+    for j in i.parent().children():
+        if j.name().startswith(o):
+            try:
+                n = max(n,int(float(j.name().split("_")[-1])))        
+            except:
+                n=0
+    m.setName(o + str(n+1))
+    m.setPosition((i.position()[0],i.position()[1]-1))
+    m.setColor(hou.Color((0.1,2,0.1)))
+    m.parm("objpath1").set(m.relativePathTo(i))
+# -----------------------------------------------------
+# align nodes to grid (alt+a)
+for i in hou.selectedNodes():
+    p = i.position()
+    x = p[0]
+    y = p[1] 
+    x2 = round(x*.5,0)*2-0.5
+    x3 = round(x*.5+1,0)*2-0.5    
+    y2= round(y)-0.15
+    y3= round(y+1)-0.15    
+    x_ = x3
+    if(abs(x2-x)<abs(x3-x)):x_=x2   
+    y_ = y3
+    if(abs(y2-y)<abs(y3-y)):y_=y2
+    i.setPosition((x_,y_))
 # -----------------------------------------------------
 def find_displayed_node():
     # find current network editor pane
