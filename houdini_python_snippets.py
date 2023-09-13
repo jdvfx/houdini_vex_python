@@ -1,4 +1,20 @@
 # -----------------------------------------------------
+# create point with hardcoded centroid values
+n = hou.selectedNodes()[0]
+
+pos = n.position()
+add = n.parent().createNode("add")
+
+add.setPosition((pos[0],pos[1]-1))
+add.parm("usept0").set(1)
+
+axis = ['x','y','z']
+
+for a in axis:
+    t = 'centroid("'+n.path()+'",D_'+a.upper()+')'
+    add.parm("pt0"+a).setExpression(t)
+    add.parm("pt0"+a).deleteAllKeyframes()
+# -----------------------------------------------------
 # Freeze Bounds
 # create box with hardcoded bounds values 
 n = hou.selectedNodes()[0]
