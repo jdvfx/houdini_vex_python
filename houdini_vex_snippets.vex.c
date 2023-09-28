@@ -160,7 +160,9 @@ v@P-=pivot;
 v@P*=m;
 v@P+=pivot;
 v@P+=p-pivot;
-
+/* -------------------------------------------------------------- */
+// remove empty volumes (no active voxels)
+if(primintrinsic(0,"activevoxelcount",@primnum)==0)removeprim(0,@primnum,1);
 /* -------------------------------------------------------------- */
 // random color from name attribute
 // run on primitives or points
