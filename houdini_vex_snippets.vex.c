@@ -5,6 +5,17 @@ if(pt_found == chi("reverse_selection")){
         removepoint(0,i@ptnum,1);
 }
 /* -------------------------------------------------------------- */
+// ramp between 2 points on XZ plane
+vector p0 = point(1,"P",0);
+vector p1 = point(2,"P",0);
+float dist = distance(p0,p1);
+float angle  = atan2(p1.x-p0.x,p1.z-p0.z);
+vector axis = {0,1,0};
+
+vector p = qrotate(quaternion(-angle, axis),@P-p1);
+float f = fit(p.z,p1.z,p1.z-dist,0,1);
+@Cd = lerp({0,0,1},{1,0,0},f);
+/* -------------------------------------------------------------- */
 // #rotate vel around axis
 float angle = radians(chf("angle_in_degrees"));
 vector axis = chv("axis");
