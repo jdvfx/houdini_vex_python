@@ -87,6 +87,18 @@ def getCurrentCamera():
             return i.curViewport().camera().path()
             break
 # -----------------------------------------------------
+# walk up the node tree (recursive)
+def branch_up(node):
+    inputs = node.inputs()
+    if len(inputs)==0:
+        return node
+    else:
+        #default to first input unless switch node
+        selected_input = inputs[0] 
+        if node.type().name()=="switch":
+            selected_input = inputs[node.evalParm("input")]
+    return branch_up(selected_input)
+# -----------------------------------------------------
 # walk down chain of nodes and get the last node
 # useful to trigger a ROP job, from SOP
 def branch_down(node):
