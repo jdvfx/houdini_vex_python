@@ -1,4 +1,7 @@
 //* -------------------------------------------------------------- */
+// remove overlapping points (radius is 0 if perfectly overlapping)
+if(pcnumfound(pcopen(1,"P",@P,chf("radius"),1))>0)removepoint(0,@ptnum);
+//* -------------------------------------------------------------- */
 // keep point in #proximity (or #cull by proximity)
 int pt_found = pcnumfound(pcopen(1,"P",v@P,chf("radius"),1));
 if(pt_found == chi("reverse_selection")){
