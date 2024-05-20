@@ -96,6 +96,10 @@ chain(usd_rop)
 usd_rop.parm("savestyle").set("flattenstage")
 
 # 3) Principled shaders to MaterialX
+
+# manual cook, otherwise it takes forever to create materials
+hou.setUpdateMode(hou.updateMode.Manual)
+
 stage = hou.node("/stage")
 # needs a materialX reference subnet, not creating the by hand...
 mtlx_ref = hou.node('/obj/matnet_ref/mtlxmaterial')
@@ -135,7 +139,8 @@ for shader in principledshaders:
                 input_idx = surface.inputIndex(mtlx_parm)
                 surface.setInput(input_idx,image)
 
-    
+
+hou.setUpdateMode(hou.updateMode.OnMouseUp)
     
 """
 TODO:
