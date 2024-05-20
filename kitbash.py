@@ -95,6 +95,11 @@ usd_rop = stage.createNode("usd_rop")
 chain(usd_rop)
 usd_rop.parm("savestyle").set("flattenstage")
 
-        
-        
+"""
+TO DO:
+    - cleanup shop_materialpath prim attribs
+    - create materialX network
+    - create materialX nodes
+    - assign materials to groups
+"""
         
