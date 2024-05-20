@@ -95,11 +95,52 @@ usd_rop = stage.createNode("usd_rop")
 chain(usd_rop)
 usd_rop.parm("savestyle").set("flattenstage")
 
+# 3) Principled shaders to MaterialX
+stage = hou.node("/stage")
+# needs a materialX reference subnet, not creating the by hand...
+mtlx_ref = hou.node('/obj/matnet_ref/mtlxmaterial')
+mat_lib = stage.createNode("materiallibrary")
+
 """
-TO DO:
+TODO:
+    - make a complete list of textures
+    - add all colors and values, not just textures
+"""
+
+pr2mtlx={}
+pr2mtlx["basecolor"]="base_color"
+pr2mtlx["rough"]="diffuse_roughness"
+pr2mtlx["reflect"]="specular"
+pr2mtlx["baseNormal"]="normal"
+pr2mtlx["emitcolor"]="emission_color"
+
+principledshaders = hou.vopNodeTypeCategory().nodeTypes()["principledshader::2.0"].instances()
+for shader in principledshaders:
+    m = hou.copyNodesTo([mtlx_ref],mat_lib)
+    mtlx = m[0]
+    mtlx.setName(shader.name())
+    
+    for parm in shader.parms():
+        if parm.name().endswith("_texture"):
+            texture_path = parm.eval()
+            if texture_path:
+                
+                parm_name = parm.name().split("_texture")[0]
+                mtlx_parm = pr2mtlx[parm_name]
+                
+                image = mtlx.createNode("mtlximage")
+                image.parm("file").set(texture_path)
+                
+                surface = mtlx.node("mtlxstandard_surface")
+                input_idx = surface.inputIndex(mtlx_parm)
+                surface.setInput(input_idx,image)
+
+    
+    
+"""
+TODO:
     - cleanup shop_materialpath prim attribs
     - create materialX network
     - create materialX nodes
     - assign materials to groups
 """
-        
