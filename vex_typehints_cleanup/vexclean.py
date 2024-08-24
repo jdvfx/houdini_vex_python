@@ -5,10 +5,20 @@ new_lines = fix_types(lines)
 """
 
 lookup = {
+    'active':'i',
+    'stopped':'i',
+    'dead':'i',
+    'id':'i',
+    'ptnum':'i',
+    'primnum':'i',
     'Cd':'v',
-    'Alpha':'f',
-    'pscale':'f',
+    'N':'v',
+    'P':'v',
     'v':'v',
+    'vel':'v',
+    'rest':'v',
+    'w':'v',
+    'name':'s',
     'orient':'p'
 }
 
