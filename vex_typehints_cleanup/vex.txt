@@ -1,0 +1,19 @@
+
+// test 
+@Cd={1,0,1};
+@Alpha=1.0;
+@Bob=1;
+{}
+if test>10{
+	printf("bbo");
+}
+@Test=94.0;
+@Strf="erlk";
+
+
+// other test
+
+f@rur = 10.0;
+v@err = 10.0;
+
+
