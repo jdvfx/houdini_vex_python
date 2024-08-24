@@ -130,43 +130,49 @@ def window(array, window_size):
 def get_time(dir,file):
     return os.path.getmtime(os.path.join(dir, file))
 
-if selected_nodes:
-    node = selected_nodes[0]
+def print_sim_time() -> None:
+    if selected_nodes:
+        node = selected_nodes[0]
 
-    if node.type().name() == cache_node_type: 
-        file = node.evalParm(cache_file_parm)
+        if node.type().name() == cache_node_type: 
+            file = node.evalParm(cache_file_parm)
+            dir = os.path.dirname(file)
+            
+            try:
+                files = [file for file in os.listdir(dir) if file.endswith(file_extension)]
+            except Exception:
+                return
 
-        dir = os.path.dirname(file)
-
-        files = [file for file in os.listdir(dir) if file.endswith(file_extension)]
-        files.sort(
-            key=lambda x: os.path.getmtime(os.path.join(dir, x)), reverse=False
-        )
-        
-        for fwin in window(files,2):
-            t0 = get_time(dir,fwin[0])
-            t1 = get_time(dir,fwin[1])
-        
+            files.sort(
+                key=lambda x: os.path.getmtime(os.path.join(dir, x)), reverse=False
+            )
+            
+            for fwin in window(files,2):
+                t0 = get_time(dir,fwin[0])
+                t1 = get_time(dir,fwin[1])
+            
+                # time difference in seconds
+                time_diff_seconds = abs(t0 - t1)
+                
+                # convert to timedelta object
+                time_diff = timedelta(seconds=time_diff_seconds)
+                
+                frame = fwin[0].split(".")[1]
+                print(f"frame: {frame} > time: {str(time_diff)}")
+            
+            # creation times for first/last files
+            t0 = get_time(dir,files[0])
+            t1 = get_time(dir,files[-1])
+            
             # time difference in seconds
             time_diff_seconds = abs(t0 - t1)
             
             # convert to timedelta object
             time_diff = timedelta(seconds=time_diff_seconds)
             
-            frame = fwin[0].split(".")[1]
-            print(f"frame: {frame} > time: {str(time_diff)}")
-        
-        # creation times for first/last files
-        t0 = get_time(dir,files[0])
-        t1 = get_time(dir,files[-1])
-        
-        # time difference in seconds
-        time_diff_seconds = abs(t0 - t1)
-        
-        # convert to timedelta object
-        time_diff = timedelta(seconds=time_diff_seconds)
-        
-        print(f"\n> total cache time: {str(time_diff)}")
+            print(f"\n> total cache time: {str(time_diff)}")
+
+print_sim_time()
 # ------------------------------------------------
 # get lastest written bgeo.sc and go to that frame
 # 
@@ -186,11 +192,15 @@ if selected_nodes:
 
         dir = os.path.dirname(file)
 
-        files = [file for file in os.listdir(dir) if file.endswith(file_extension)]
-        files.sort(
-            key=lambda x: os.path.getmtime(os.path.join(dir, x)), reverse=True
-        )
-        newest_file = os.path.basename(files[0])
-        last_frame = float(newest_file.split(".")[1])
-        hou.setFrame(last_frame)
+        try:
+            files = [file for file in os.listdir(dir) if file.endswith(file_extension)]
+        except Exception:
+            files = []
+        if len(files)>0:
+            files.sort(
+                key=lambda x: os.path.getmtime(os.path.join(dir, x)), reverse=True
+            )
+            newest_file = os.path.basename(files[0])
+            last_frame = float(newest_file.split(".")[1])
+            hou.setFrame(last_frame)
 
