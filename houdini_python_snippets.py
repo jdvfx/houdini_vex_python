@@ -50,19 +50,33 @@ for i in hou.selectedNodes():
     m.setColor(hou.Color((0.1,2,0.1)))
     m.parm("objpath1").set(m.relativePathTo(i))
 # -----------------------------------------------------
-# align nodes to grid (alt+a)
-for i in hou.selectedNodes():
+# align nodes and dots to grid (alt+a)
+for i in hou.selectedItems():
+
     p = i.position()
     x = p[0]
-    y = p[1] 
-    x2 = round(x*.5,0)*2-0.5
-    x3 = round(x*.5+1,0)*2-0.5    
-    y2= round(y)-0.15
-    y3= round(y+1)-0.15    
-    x_ = x3
-    if(abs(x2-x)<abs(x3-x)):x_=x2   
-    y_ = y3
-    if(abs(y2-y)<abs(y3-y)):y_=y2
+    y = p[1]
+
+    if isinstance(i,hou.Node):
+    
+        x2 = round(x*.5,0)*2-0.5
+        x3 = round(x*.5+1,0)*2-0.5    
+        y2= round(y)-0.15
+        y3= round(y+1)-0.15    
+        x_ = x3
+        if(abs(x2-x)<abs(x3-x)):x_=x2   
+        y_ = y3
+        if(abs(y2-y)<abs(y3-y)):y_=y2
+     
+    if isinstance(i,hou.NetworkDot):
+    
+        x1 = math.floor(x/2)*2
+        x2 = math.ceil(x/2)*2
+        x_ = x1
+        if(abs(x-x2)<abs(x-x1)):
+            x_ = x2
+        y_ = round(y)
+        
     i.setPosition((x_,y_))
 # -----------------------------------------------------
 def find_displayed_node():
