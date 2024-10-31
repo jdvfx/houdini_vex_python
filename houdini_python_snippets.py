@@ -218,3 +218,54 @@ if selected_nodes:
             last_frame = float(newest_file.split(".")[1])
             hou.setFrame(last_frame)
 
+
+# ---------------------------------------------------
+# bake mask values (from Paint SOP) as a wrangle node
+#
+import re
+
+me = hou.pwd()
+geo = me.inputs()[0].geometry()
+
+# set floating point decimals
+def prec(f:float,precision:int) -> float:
+    p = pow(10,precision);
+    return int(f*p)/p;
+
+# store point positions and mask values: [[P.x,P.y,P.z,mask],...]
+data=[]
+for pt in geo.points():
+    p=pt.attribValue("P")
+    m=pt.attribValue("mask")
+
+    dec_p = me.evalParm("dec_p") # default=3
+    dec_m = me.evalParm("dec_m") # default=2
+    
+    x = [prec(p[0],dec_p),prec(p[1],dec_p),prec(p[2],dec_p),prec(m,dec_m)]
+    data.append(x)
+
+# create wrangle snippet string
+s = str(data)
+s = re.sub(r"\[","{",s)
+s = re.sub(r"\]","}",s)
+
+s_ = f"vector4 a[]={s};"
+
+createpoints="""
+foreach(vector4 v;a){
+    vector p_ = set(v[0],v[1],v[2]);
+    int n=addpoint(0,p_);
+    setpointattrib(0,"mask",n,v[3]);
+}"""
+
+s_+=f"\n{createpoints}"
+
+# create wrangle and set snippet string
+wrangle = me.parent().createNode("attribwrangle")
+pos = me.position()
+wrangle.setPosition((pos[0],pos[1]-1))
+wrangle.parm("class").set(0)
+wrangle.parm("snippet").set(s_)
+wrangle.setDisplayFlag("on")
+wrangle.setSelected("on")
+
