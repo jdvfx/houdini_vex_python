@@ -1,4 +1,7 @@
 //* -------------------------------------------------------------- */
+// create id from name
+i@id = int(random_shash(s@name));
+//* -------------------------------------------------------------- */
 // remove overlapping points (radius is 0 if perfectly overlapping)
 if(pcnumfound(pcopen(1,"P",@P,chf("radius"),1))>0)removepoint(0,@ptnum);
 //* -------------------------------------------------------------- */
