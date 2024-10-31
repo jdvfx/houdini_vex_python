@@ -238,8 +238,8 @@ for pt in geo.points():
     p=pt.attribValue("P")
     m=pt.attribValue("mask")
 
-    dec_p = me.evalParm("dec_p") # default=3
-    dec_m = me.evalParm("dec_m") # default=2
+    dec_p = me.evalParm("dec_p")
+    dec_m = me.evalParm("dec_m")
     
     x = [prec(p[0],dec_p),prec(p[1],dec_p),prec(p[2],dec_p),prec(m,dec_m)]
     data.append(x)
@@ -249,7 +249,7 @@ s = str(data)
 s = re.sub(r"\[","{",s)
 s = re.sub(r"\]","}",s)
 
-s_ = f"vector4 a[]={s};"
+snippet = f"vector4 a[]={s};"
 
 createpoints="""
 foreach(vector4 v;a){
@@ -258,14 +258,14 @@ foreach(vector4 v;a){
     setpointattrib(0,"mask",n,v[3]);
 }"""
 
-s_+=f"\n{createpoints}"
+snippet+=f"\n{createpoints}"
 
 # create wrangle and set snippet string
 wrangle = me.parent().createNode("attribwrangle")
 pos = me.position()
 wrangle.setPosition((pos[0],pos[1]-1))
 wrangle.parm("class").set(0)
-wrangle.parm("snippet").set(s_)
+wrangle.parm("snippet").set(snippet)
 wrangle.setDisplayFlag("on")
 wrangle.setSelected("on")
 
