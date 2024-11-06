@@ -1,4 +1,3 @@
-# -----------------------------------------------------
 # create point with hardcoded centroid values
 n = hou.selectedNodes()[0]
 
@@ -268,4 +267,7 @@ wrangle.parm("class").set(0)
 wrangle.parm("snippet").set(snippet)
 wrangle.setDisplayFlag("on")
 wrangle.setSelected("on")
-
+# -----------------------------------------------------
+# get all SOP nodes of type "subnet"
+subnets = hou.sopNodeTypeCategory().nodeTypes()["subnet"].instances()
+# -----------------------------------------------------
