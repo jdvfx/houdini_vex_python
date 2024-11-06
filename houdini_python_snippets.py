@@ -271,3 +271,20 @@ wrangle.setSelected("on")
 # get all SOP nodes of type "subnet"
 subnets = hou.sopNodeTypeCategory().nodeTypes()["subnet"].instances()
 # -----------------------------------------------------
+# get all SOP nodes types containing a string
+# used for nodes with version "baked in" the name: studio::mynode::5.0
+def get_nodetypes_and_versions(node_type_name:str):
+    node_types_list = []
+    node_types = hou.nodeTypeCategories()["Sop"].nodeTypes()
+    for node_type in node_types:
+        if(node_type_name in node_type):
+            node_types_list.append(node_type)
+    return node_types_list
+"""
+>>>get_nodetypes_and_versions("voronoifracture")
+voronoifracture
+voronoifracture::2.0
+voronoifracturepoints
+"""
+# -----------------------------------------------------
+
