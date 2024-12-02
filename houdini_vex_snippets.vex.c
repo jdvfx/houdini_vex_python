@@ -708,4 +708,6 @@ int points = len(primpoints(0,@primnum));
 if(points<3)removeprim(0,@primnum,1);
 if(points>4)@group_ngons=1;
 // -----------------------------------------------------------------
-
+// cast attribute as vector
+setattribtypeinfo(0,"point",chs("my_attribute"),"vector");
+// -----------------------------------------------------------------
