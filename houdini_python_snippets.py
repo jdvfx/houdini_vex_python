@@ -287,4 +287,13 @@ voronoifracture::2.0
 voronoifracturepoints
 """
 # -----------------------------------------------------
+# set enviroment variables
+env_vars = {
+    "WEDGE":0,
+    "CLUSTER":0
+}
 
+for varname,value in env_vars.items():
+    hou.hscript(f"set -g {varname} = {value}; varchange")
+    print(f"var: {varname}\tvalue:{value}")
+# -----------------------------------------------------
