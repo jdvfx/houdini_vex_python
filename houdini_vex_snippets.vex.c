@@ -1,3 +1,18 @@
+
+//* -------------------------------------------------------------- */
+// delete by #proximity to points
+// with #falloff and random threshold
+int handle = pcopen(1,"P",@P,chf("radius"),1);
+if(pcnumfound(handle)>0){
+    vector p = pcimportbyidxv(handle,"P",0);
+    float d = fit(distance(@P,p),0,chf("radius"),1,0);
+    float r = rand(@ptnum+chf("seed"));
+    float e = 1.0/pow(d,chf("exp"));
+
+    if(r*e<chf("treshold")){
+        removepoint(0,@ptnum);
+    }
+}
 //* -------------------------------------------------------------- */
 // create id from name
 i@id = int(random_shash(s@name));
@@ -513,7 +528,8 @@ if(pcnumfound(handle)>0){
             for(int i=0;i< steps;i++){
             
                 float d = float(i)/float(steps);
-                vector r = (rand(v@P*3927+i*537)*vector(2)-1);
+                // 3d rand noise
+                vector r = (rand(v@P*3927+i*537+chf("seed"))*vector(2)-1);
                 vector p_ = lerp(v@P,p,d)+r*chf("jitter");
                 
                 int newpoint = addpoint(0,p_);
