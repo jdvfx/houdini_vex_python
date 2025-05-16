@@ -22,15 +22,24 @@ backup file:
 
 > usage:
 add to pre-render python script
+!!! WARNING !!!
+paste as plain text, the pre-render script background color should be BLACK! (not pink/cyan)
+otherwize it will run as callback (runs on frame change or button press)
+
 
 """
-
 
 
 import shutil
 import datetime
 import os
 import re
+
+node=hou.pwd().parent()
+
+# increment version
+ver=node.parm("version")
+ver.set(ver.eval()+1)
 
 # save current scene
 hou.hipFile.save()
@@ -39,7 +48,7 @@ hipfile = hou.hipFile.name()
 hipext = os.path.splitext(hipfile)[-1]
 
 # filecache geo path
-sopoutput = hou.pwd().evalParm("sopoutput")
+sopoutput = node.evalParm("sopoutput")
 
 # hip name
 hipname = re.sub(hipext,"",os.path.basename(hipfile))
