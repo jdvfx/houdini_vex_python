@@ -577,33 +577,37 @@ v@oldP = v@P;
 
 /* -------------------------------------------------------------- */
 // #connect #adjacent #pieces
-void line(vector pos1,pos2){
+void line(vector pos1,pos2;string name1,name2){
     int p1 = addpoint(0,pos1);
     int p2 = addpoint(0,pos2);
     int prim = addprim(0,"polyline");
     int v1 = addvertex(0,prim,p1);
     int v2 = addvertex(0,prim,p2);
+    setpointattrib(0,"name",p1,name1);
+    setpointattrib(0,"name",p2,name2);
 }
+// add name attrib
+addpointattrib(0,"name","");
 
 int handle = pcopen(0,"P",v@P,chf("radius"),chi("maxpoints"));
 if(pcnumfound(handle)>0){
     while(pciterate(handle)){
-        int id;
-        pcimport(handle,"pieceid",id);
-        if(id!=i@pieceid){            
+        int ptnum;
+        string name;
+        pcimport(handle,"name",name);
+        pcimport(handle,"point.number",ptnum);
+        if(name!=s@name && ptnum>@ptnum){            
             vector p;
             pcimport(handle,"P",p);        
-            line(v@P,p);                    
+            line(v@P,p,name,s@name);                    
         }     
     }
 }
-
-/* -------------------------------------------------------------- */
 // remove #lone points (unconnected)
 if(neighbourcount(0,i@ptnum)==0){
     removepoint(0,i@ptnum);
 }else{
-    // collapse lines into points (centroids)
+    // collapse lines to their centroids (optional)
     v@P = (v@P+point(0,"P",neighbour(0,i@ptnum,0)))*.5;
 }
 
