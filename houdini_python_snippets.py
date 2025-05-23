@@ -128,8 +128,14 @@ from datetime import datetime, timedelta
 
 selected_nodes = hou.selectedNodes()
 
-cache_node_type = "file";
-cache_file_parm = "file";
+# file SOP
+# cache_node_type = "file"
+# cache_file_parm = "file"
+
+# fileCache SOP
+cache_node_type = "filecache::2.0"
+cache_file_parm = "sopoutput"
+
 file_extension = "bgeo.sc"
 
 def window(array, window_size):
@@ -145,6 +151,8 @@ def get_time(dir,file):
 
 def print_sim_time() -> None:
     if selected_nodes:
+
+        print(" ------------------ ")
         node = selected_nodes[0]
 
         if node.type().name() == cache_node_type: 
@@ -169,6 +177,7 @@ def print_sim_time() -> None:
                 
                 # convert to timedelta object
                 time_diff = timedelta(seconds=time_diff_seconds)
+                time_diff = str(time_diff).split(".")[0]
                 
                 frame = fwin[0].split(".")[1]
                 print(f"frame: {frame} > time: {str(time_diff)}")
@@ -182,6 +191,7 @@ def print_sim_time() -> None:
             
             # convert to timedelta object
             time_diff = timedelta(seconds=time_diff_seconds)
+            time_diff = str(time_diff).split(".")[0]
             
             print(f"\n> total cache time: {str(time_diff)}")
 
