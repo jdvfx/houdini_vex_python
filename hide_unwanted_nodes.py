@@ -24,7 +24,7 @@ for cat in cats:
         for node_to_hide in hidelist:
             if node_to_hide in node_type and node_type not in keeplist:
                 hidden_nodes.append(f"{cat} {node_type}")
-                cats[cat].nodeTypes()[type].setHidden(1)
+                cats[cat].nodeTypes()[node_type].setHidden(1)
 
 with open("/tmp/houdini_hidden_nodes.txt","w") as file:
     for node in hidden_nodes:
