@@ -174,7 +174,7 @@ float sz = b[5]-b[4];
 float vol = sx*sy*sz;
 if(max(max(sx,sy),sz)<chf("max_axis"))removeprim(0,i@primnum,1);
 if(min(min(sx,sy),sz)<chf("min_axis"))removeprim(0,i@primnum,1);
-if(f@vol<chf("max_vol"))removeprim(0,i@primnum,1);
+if(vol<chf("max_vol"))removeprim(0,i@primnum,1);
 
 /* -------------------------------------------------------------- */
 // average neighbouring normals
