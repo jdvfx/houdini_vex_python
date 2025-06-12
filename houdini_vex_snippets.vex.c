@@ -165,12 +165,16 @@ for(int i=0;i<chi("octaves");i++){
 v@Cd=(c/maxval)*chf("mult");
 
 /* -------------------------------------------------------------- */
-// #filter by #size (max axis) when using packed primitives
-vector b = primintrinsic(0,"bounds",i@primnum);
+// #$ilter packed primitives by size
+// min/max axis, volume
+float b[] = primintrinsic(0,"bounds",i@primnum);
 float sx = b[1]-b[0];
 float sy = b[3]-b[2];
 float sz = b[5]-b[4];
+float vol = sx*sy*sz;
 if(max(max(sx,sy),sz)<chf("max_axis"))removeprim(0,i@primnum,1);
+if(min(min(sx,sy),sz)<chf("min_axis"))removeprim(0,i@primnum,1);
+if(f@vol<chf("max_vol"))removeprim(0,i@primnum,1);
 
 /* -------------------------------------------------------------- */
 // average neighbouring normals
