@@ -735,3 +735,18 @@ if(points>4)@group_ngons=1;
 // cast attribute as vector
 setattribtypeinfo(0,"point",chs("my_attribute"),"vector");
 // -----------------------------------------------------------------
+// point decimate using @ptnum or @id
+int pt = i@ptnum;
+if(chi("use_id"))pt=i@id;
+
+float t = chf("threshold");
+if(chi("reverse_selection"))t=1-t;
+
+if(rand(pt)>t){
+    if(chi("delete_points")){
+        removepoint(0,@ptnum);
+    }else{
+        @Cd={1,0,0};
+    }
+}
+// -----------------------------------------------------------------
