@@ -307,3 +307,19 @@ for varname,value in env_vars.items():
     hou.hscript(f"set -g {varname} = {value}; varchange")
     print(f"var: {varname}\tvalue:{value}")
 # -----------------------------------------------------
+# set cache nodes red
+# set other nodes grey if they are already red
+# > helps to quickly identify cache nodes
+cachenodes=["rop_geometry","filemerge::2.0","filecache::2.0"]
+
+for n in hou.node("/obj").children():
+    if n.type().name()=="geo":
+        red = hou.Color((1,0,0))
+        grey = hou.Color((0.5,0.5,0.5))
+        for j in n.children():
+            if j.type().name() in cachenodes:
+                j.setColor(red)
+            else:
+                if j.color()==red:
+                    j.setColor(grey)
+
