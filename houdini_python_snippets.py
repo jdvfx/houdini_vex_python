@@ -312,14 +312,17 @@ for varname,value in env_vars.items():
 # > helps to quickly identify cache nodes
 cachenodes=["rop_geometry","filemerge::2.0","filecache::2.0"]
 
+red = hou.Color((1,0,0))
+darkred = hou.Color((0.8,0.016,0.016))
+grey = hou.Color((0.5,0.5,0.5))
+
 for n in hou.node("/obj").children():
     if n.type().name()=="geo":
-        red = hou.Color((1,0,0))
-        grey = hou.Color((0.5,0.5,0.5))
+
+
         for j in n.children():
             if j.type().name() in cachenodes:
                 j.setColor(red)
             else:
-                if j.color()==red:
+                if j.color()==red or j.color()==darkred:
                     j.setColor(grey)
-
