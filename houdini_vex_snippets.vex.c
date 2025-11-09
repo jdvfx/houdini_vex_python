@@ -1,5 +1,9 @@
 
 //* -------------------------------------------------------------- */
+// double cross product (for vel flow field)
+vector N = normalize(v@N);
+v@v = cross(cross(N,v@v),-N);
+//* -------------------------------------------------------------- */
 // delete by #proximity to points
 // with #falloff and random threshold
 int handle = pcopen(1,"P",@P,chf("radius"),1);
