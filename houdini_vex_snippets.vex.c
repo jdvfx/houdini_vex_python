@@ -754,3 +754,17 @@ if(rand(pt)>t){
     }
 }
 // -----------------------------------------------------------------
+// blend packed pieces transforms
+// target position and orient
+v@rest=point(0,"rest",@ptnum);
+v@restorient=point(0,"restorient",@ptnum);
+
+float blend = 0.5;
+v@P=lerp(@P,v@rest,blend);
+
+matrix3 m = primintrinsic(0,"transform",@ptnum);
+vector4 orient = quaternion(m);
+orient = slerp(orient,p@restorient,blend);
+matrix3 newm = qconvert(orient);
+setprimintrinsic(0,"transform",@ptnum,newm,"set");
+//
