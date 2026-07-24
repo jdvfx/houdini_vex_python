@@ -4,35 +4,51 @@ avoid freeze/crashes with div_size close to zero
 """
 import math
 
-# user parms
-div_size_A = 0.02
-max_voxels = 100_000_0
 
-# bounding box size (in SOP)
+# me = hou.pwd()
+
+""" user parms """
+div_size = 0.02
+# div_size_A = me.parm("div_size").eval()
+max_voxels = 1_000_000
+# max_voxels = me.parm("max_voxels").eval()
+
+""" bounding box size """
 bbox_size = [1.5,5.1,2.1]
+# me.parm("bbox_size").eval()
 
 def create_volume(size:list[float],div_size:float) -> list[float]:
-    dx = math.ceil(size[0]/div_size)
-    dy = math.ceil(size[1]/div_size)
-    dz = math.ceil(size[2]/div_size)
+    dx = math.floor(size[0]/div_size)
+    dy = math.floor(size[1]/div_size)
+    dz = math.floor(size[2]/div_size)
     return [dx,dy,dz]
 
 def voxel_count(vol:list[int]) -> int:
     return vol[0]*vol[1]*vol[2]
 
-# check voxel count (for non-sparse volume)
-voxels_A = create_volume(bbox_size,div_size_A)
-voxels_A_count = voxel_count(voxels_A)
+""" check voxel count (for non-sparse volume) """
+voxels = create_volume(bbox_size,div_size)
+voxels_count = voxel_count(voxels)
 
-# safe div size so voxels<max_voxels
-ratio = min(max_voxels/voxels_A_count,1)
-div_size_B = div_size_A / ratio
+""" safe div size so voxels<max_voxels """
+ratio = float(voxels_count)/float(max_voxels)
+safe_voxels_count = voxels_count / ratio
 
-# check new voxel count (for non-sparse volume)
-voxels_B = create_volume(bbox_size,div_size_B)
-voxels_B_count = voxel_count(voxels_B)
+ratio = (voxels_count/safe_voxels_count) ** (1/3);
+safe_div_size = div_size * ratio
 
-# display stats
-print("{:<20} {:>5}".format(str(voxels_A), voxels_A_count))
-print("{:<20} {:>5}".format(str(voxels_B), voxels_B_count))
+# set safe voxel size
+# return safe_div_size
+
+""" check new voxel count (for non-sparse volume) """
+safe_voxels = create_volume(bbox_size,safe_div_size)
+safe_voxels_count = voxel_count(safe_voxels)
+
+""" display stats """
+print(f"{voxels} {voxels_count:,.0f}")
+print(f"{safe_voxels} {safe_voxels_count:,.0f}")
+
+
+
+
 

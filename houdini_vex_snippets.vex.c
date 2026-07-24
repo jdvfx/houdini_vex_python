@@ -713,16 +713,21 @@ i@groupnum=a;
 int pc = pcnumfound(pcopen(0,"P",@P,chf("radius"),chi("maxpoints")));
 float density = float(pc)/float(chi("maxpoints"));
 // -----------------------------------------------------------------
-// #volume #diffusion 
+// #volume #diffusion (stochastic blur)
 float dsum = 0;
 float mask = 1; // could be from ramp,volume,noise 
 
 for(int i=0;i<chi("steps");i++){
-    vector n = (rand(v@P*2389.42+@Frame+i)*vector(2)-1)*chf("diffusion")*mask;
-    dsum += volumesample(0,0,@P+n);
-
+    float seed = chf("seed");
+    if (chi("random_seed_per_frame")){
+        seed += f@Frame;
+    }
+    vector n = (rand(v@P*2389.42+seed+i)*vector(2)-1)*chf("diffusion_amount")*mask;
+    dsum += volumesample(0,"density",@P+n);
 }
-f@density = dsum / float(chi("steps"));
+float density_blurred = dsum / float(chi("steps"));
+f@density = lerp(f@density,density_blurred,chf("blur_mix"));
+
 // -----------------------------------------------------------------
 // worley (#cell) #noise
 float dist1,dist2;
