@@ -718,15 +718,20 @@ float dsum = 0;
 float mask = 1; // could be from ramp,volume,noise 
 
 for(int i=0;i<chi("steps");i++){
-    float seed = chf("seed");
-    if (chi("random_seed_per_frame")){
-        seed += f@Frame;
+    vector n = (rand(@P*2389+@Frame+i+chf("seed")*731.937)*vector(2)-1)*chf("diffusion")*mask;
+    float sample = volumesample(0,0,@P+n);
+    // average values
+    if(chi("sum_method")==0){
+        dsum += sample / float(chi("steps"));
     }
-    vector n = (rand(v@P*2389.42+seed+i)*vector(2)-1)*chf("diffusion_amount")*mask;
-    dsum += volumesample(0,"density",@P+n);
+    // max value
+    if(chi("sum_method")==1){
+        dsum = max(sample,dsum);
+    }
 }
-float density_blurred = dsum / float(chi("steps"));
-f@density = lerp(f@density,density_blurred,chf("blur_mix"));
+
+f@density = lerp(f@density,dsum,chf("mix"));
+
 
 // -----------------------------------------------------------------
 // worley (#cell) #noise
